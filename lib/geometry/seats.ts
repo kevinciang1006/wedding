@@ -24,16 +24,16 @@ function shapeKey(obj: SceneObject): string {
   }
 }
 
-/** Seats spaced in equal slots along an edge, centred in each slot. Each seat's angle points toward the table centre. */
-function alongEdge(count: number, width: Cm, y: Cm): LocalSeat[] {
+/** Seats spaced in equal slots along an edge, centred in each slot. */
+function alongEdge(count: number, width: Cm, y: Cm, facing: number): LocalSeat[] {
   const slot = width / count;
-  return Array.from({ length: count }, (_, k) => {
-    const x = -width / 2 + slot * (k + 0.5);
-    // Angle from this seat position toward the centre at (0, 0).
-    // Direction: (-x, -y). Angle where sin(θ) = -x/d, cos(θ) = y/d (since -cos(θ) = -y/d).
-    const angle = (Math.atan2(-x, y) * 180) / Math.PI;
-    return { x, y, angle };
-  });
+  return Array.from({ length: count }, (_, k) => ({
+    x: -width / 2 + slot * (k + 0.5),
+    y,
+    // Everyone along an edge faces square to the table, not at its centre —
+    // a guest at the end of a head table does not sit turned inward.
+    angle: facing,
+  }));
 }
 
 function localSeats(obj: SceneObject): readonly LocalSeat[] {
@@ -54,15 +54,15 @@ function localSeats(obj: SceneObject): readonly LocalSeat[] {
     }
     case 'rectTable': {
       const y = obj.height / 2 + SEAT_OFFSET;
-      const top = alongEdge(obj.seatsPerSide, obj.width, -y);
+      const top = alongEdge(obj.seatsPerSide, obj.width, -y, 180);
       // Index down one side, then back along the other, so seat order walks the table.
-      const bottom = alongEdge(obj.seatsPerSide, obj.width, y).reverse();
+      const bottom = alongEdge(obj.seatsPerSide, obj.width, y, 0).reverse();
       return [...top, ...bottom];
     }
     case 'headTable':
-      return alongEdge(obj.seatCount, obj.width, -(obj.height / 2 + SEAT_OFFSET));
+      return alongEdge(obj.seatCount, obj.width, -(obj.height / 2 + SEAT_OFFSET), 180);
     case 'sweetheart':
-      return alongEdge(2, obj.width, -(obj.height / 2 + SEAT_OFFSET));
+      return alongEdge(2, obj.width, -(obj.height / 2 + SEAT_OFFSET), 180);
     default:
       return [];
   }

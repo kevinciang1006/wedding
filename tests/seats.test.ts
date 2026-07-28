@@ -158,7 +158,14 @@ describe('seat angle', () => {
     };
   }
 
-  // Helper: assert that a seat's angle points toward the table centre
+  // Helper: assert that a seat's angle produces a specific direction
+  function assertFacesDirection(seat: { angle: number }, expectedDx: number, expectedDy: number) {
+    const { dx, dy } = angleToDirection(seat.angle);
+    expect(dx).toBeCloseTo(expectedDx, 6);
+    expect(dy).toBeCloseTo(expectedDy, 6);
+  }
+
+  // Helper: assert that a seat's angle points toward the table centre (for round tables)
   function assertAngleFacesCenter(seat: { x: number; y: number; angle: number }, cx: number = 0, cy: number = 0) {
     const { dx, dy } = angleToDirection(seat.angle);
     const dist = Math.hypot(seat.x - cx, seat.y - cy);
@@ -174,46 +181,64 @@ describe('seat angle', () => {
     }
   });
 
-  it('every rectTable seat faces the centre', () => {
-    for (const seat of getSeats(rect)) {
-      assertAngleFacesCenter(seat);
+  it('every rectTable top edge seat faces perpendicular (down)', () => {
+    const seats = getSeats(rect).slice(0, 4);
+    for (const seat of seats) {
+      assertFacesDirection(seat, 0, 1);
     }
   });
 
-  it('every headTable seat faces the centre', () => {
+  it('every rectTable bottom edge seat faces perpendicular (up)', () => {
+    const seats = getSeats(rect).slice(4);
+    for (const seat of seats) {
+      assertFacesDirection(seat, 0, -1);
+    }
+  });
+
+  it('every headTable seat faces perpendicular (down)', () => {
     const head: SceneObject = {
       id: 'h1', type: 'headTable', x: 0, y: 0, rotation: 0, label: 'head table', z: 0,
       width: 480, height: 90, seatCount: 8,
     };
     for (const seat of getSeats(head)) {
-      assertAngleFacesCenter(seat);
+      assertFacesDirection(seat, 0, 1);
     }
   });
 
-  it('every sweetheart seat faces the centre', () => {
+  it('outermost seat on wide head table faces perpendicular, not angled inward', () => {
+    const head: SceneObject = {
+      id: 'h1', type: 'headTable', x: 0, y: 0, rotation: 0, label: 'head table', z: 0,
+      width: 480, height: 90, seatCount: 8,
+    };
+    const seats = getSeats(head);
+    // Seat 0 is at far left, seat 7 at far right
+    assertFacesDirection(seats[0], 0, 1);
+    assertFacesDirection(seats[7], 0, 1);
+  });
+
+  it('every sweetheart seat faces perpendicular (down)', () => {
     const sweet: SceneObject = {
       id: 's1', type: 'sweetheart', x: 0, y: 0, rotation: 0, label: 'sweetheart', z: 0,
       width: 150, height: 75,
     };
     for (const seat of getSeats(sweet)) {
-      assertAngleFacesCenter(seat);
+      assertFacesDirection(seat, 0, 1);
     }
   });
 
-  it('seat 0 of round and headTable face the same direction (both above centre)', () => {
+  it('round table seat 0 and sweetheart seat 0 face the same direction (both face down)', () => {
     const roundSeat0 = getSeats(round({ seatCount: 8 }))[0];
-    // Single-seat headTable: the one seat is at the centre of the top edge, directly above.
-    const head: SceneObject = {
-      id: 'h1', type: 'headTable', x: 0, y: 0, rotation: 0, label: 'head table', z: 0,
-      width: 480, height: 90, seatCount: 1,
+    const sweet: SceneObject = {
+      id: 's1', type: 'sweetheart', x: 0, y: 0, rotation: 0, label: 'sweetheart', z: 0,
+      width: 150, height: 75,
     };
-    const headSeat0 = getSeats(head)[0];
+    const sweetSeat0 = getSeats(sweet)[0];
 
     const { dx: rd, dy: ry } = angleToDirection(roundSeat0.angle);
-    const { dx: hd, dy: hy } = angleToDirection(headSeat0.angle);
+    const { dx: sd, dy: sy } = angleToDirection(sweetSeat0.angle);
 
-    expect(rd).toBeCloseTo(hd, 6);
-    expect(ry).toBeCloseTo(hy, 6);
+    expect(rd).toBeCloseTo(sd, 6);
+    expect(ry).toBeCloseTo(sy, 6);
   });
 
   it('rotating a table rotates its seats\' facing directions', () => {
