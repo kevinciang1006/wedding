@@ -120,14 +120,25 @@ export function loadSavedDoc(): Doc | null {
   }
 }
 
+function isObject(value: unknown): value is object {
+  return typeof value === 'object' && value !== null;
+}
+
+/**
+ * Guards imported and restored documents. Uses `in` narrowing rather than a cast
+ * to Record<string, unknown>: the constraint against `as` exists precisely so a
+ * validator cannot quietly assert the shape it is supposed to be checking.
+ */
 export function isDoc(value: unknown): value is Doc {
-  if (typeof value !== 'object' || value === null) return false;
-  const v = value as Record<string, unknown>;
-  return v.version === 1
-    && typeof v.room === 'object' && v.room !== null
-    && typeof v.objects === 'object' && v.objects !== null
-    && Array.isArray(v.objectOrder)
-    && typeof v.guests === 'object' && v.guests !== null
-    && Array.isArray(v.guestOrder)
-    && typeof v.seatAssignments === 'object' && v.seatAssignments !== null;
+  return isObject(value)
+    && 'version' in value && value.version === 1
+    && 'title' in value && typeof value.title === 'string'
+    && 'eventDate' in value && (value.eventDate === null || typeof value.eventDate === 'string')
+    && 'units' in value && (value.units === 'm' || value.units === 'ft')
+    && 'room' in value && isObject(value.room)
+    && 'objects' in value && isObject(value.objects)
+    && 'objectOrder' in value && Array.isArray(value.objectOrder)
+    && 'guests' in value && isObject(value.guests)
+    && 'guestOrder' in value && Array.isArray(value.guestOrder)
+    && 'seatAssignments' in value && isObject(value.seatAssignments);
 }

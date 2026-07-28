@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createEmptyDoc, getDoc, useDocStore } from '@/stores/docStore';
+import { createEmptyDoc, getDoc, isDoc, useDocStore } from '@/stores/docStore';
 import { createObject } from '@/lib/doc/factory';
 import type { Doc } from '@/lib/types/doc';
 
@@ -93,5 +93,39 @@ describe('undo / redo round-trip', () => {
   it('labels the pending undo', () => {
     useDocStore.getState().commit((d) => { d.title = 'Marín · Okonkwo'; }, 'rename plan');
     expect(useDocStore.getState().undoLabel).toBe('rename plan');
+  });
+});
+
+describe('isDoc', () => {
+  it('accepts a document straight from createEmptyDoc()', () => {
+    expect(isDoc(createEmptyDoc())).toBe(true);
+  });
+
+  it('rejects non-object values', () => {
+    expect(isDoc(null)).toBe(false);
+    expect(isDoc(undefined)).toBe(false);
+    expect(isDoc(42)).toBe(false);
+    expect(isDoc('string')).toBe(false);
+    expect(isDoc([])).toBe(false);
+  });
+
+  it('rejects a document with the wrong version', () => {
+    expect(isDoc({ ...createEmptyDoc(), version: 2 })).toBe(false);
+  });
+
+  // This is the case that fails against the pre-fix isDoc: it never checked
+  // `units`, so a corrupt or hand-edited localStorage value like this one
+  // sailed through the guard and would have violated the Doc type downstream.
+  it('rejects a document with an invalid units value', () => {
+    expect(isDoc({ ...createEmptyDoc(), units: 'yards' })).toBe(false);
+  });
+
+  it('rejects a document whose objectOrder is not an array', () => {
+    expect(isDoc({ ...createEmptyDoc(), objectOrder: 'not-an-array' })).toBe(false);
+  });
+
+  it('accepts a null eventDate but rejects a non-string, non-null eventDate', () => {
+    expect(isDoc({ ...createEmptyDoc(), eventDate: null })).toBe(true);
+    expect(isDoc({ ...createEmptyDoc(), eventDate: 42 })).toBe(false);
   });
 });
