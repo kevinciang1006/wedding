@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:{{box}}px;height:{{box}}px">
+  <sc-if value="{{selected}}" hint-placeholder-val="{{ false }}">
+   <div style="position:absolute;left:{{pad}}px;top:{{pad}}px;right:{{pad}}px;bottom:{{pad}}px">
+    <div style="position:absolute;left:0;top:0;right:0;bottom:0;border:1px dashed #1E62A8;background:rgba(30,98,168,0.05)"></div>
+    <div style="position:absolute;left:-4px;top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;left:50%;margin-left:-4px;top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;right:-4px;top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;left:-4px;top:50%;margin-top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;right:-4px;top:50%;margin-top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;left:-4px;bottom:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;left:50%;margin-left:-4px;bottom:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;right:-4px;bottom:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #1E62A8"></div>
+    <div style="position:absolute;left:50%;top:-22px;width:1px;height:18px;background:#1E62A8"></div>
+    <div style="position:absolute;left:50%;margin-left:-5px;top:-32px;width:10px;height:10px;border-radius:50%;background:#fff;border:1.5px solid #1E62A8"></div>
+   </div>
+  </sc-if>
+  <sc-for list="{{seatList}}" as="s" hint-placeholder-count="8">
+    <div style="position:absolute;left:50%;top:50%;width:{{seatSize}}px;height:{{seatSize}}px;margin-left:-{{seatHalf}}px;margin-top:-{{seatHalf}}px;border-radius:50%;background:{{s.bg}};border:{{s.bd}};box-shadow:{{s.sh}};transform:{{s.tf}};display:flex;align-items:center;justify-content:center">
+      <div style="width:4px;height:4px;border-radius:50%;background:{{s.dot}}"></div>
+    </div>
+  </sc-for>
+  <div style="position:absolute;left:50%;top:50%;width:{{d}}px;height:{{d}}px;margin-left:-{{dHalf}}px;margin-top:-{{dHalf}}px;border-radius:{{radius}};background:#FFFFFF;border:{{plate}};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">
+    <div style="font-family:Newsreader,Georgia,serif;font-size:{{labelSize}}px;line-height:1;color:#171B1F;letter-spacing:0.01em">{{label}}</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;line-height:1;color:{{countColor}};letter-spacing:0.04em">{{count}}</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:180,&quot;height&quot;:180},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;table 7&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;seats&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:8,&quot;tsType&quot;:&quot;number&quot;},&quot;filled&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:8,&quot;tsType&quot;:&quot;number&quot;},&quot;diet&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;target&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:-1,&quot;tsType&quot;:&quot;number&quot;},&quot;selected&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;drag&quot;,&quot;ghost&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;d&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:76,&quot;tsType&quot;:&quot;number&quot;},&quot;box&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:152,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const n = Number(p.seats ?? 8);
+    const filled = Math.max(0, Math.min(n, Number(p.filled ?? 0)));
+    const diet = String(p.diet ?? '').split(',').filter(s => s !== '').map(Number);
+    const target = Number(p.target ?? -1);
+    const d = Number(p.d ?? 68);
+    const box = Number(p.box ?? 152);
+    const seatSize = Number(p.seatSize ?? 17);
+    const ring = Number(p.ring ?? (d / 2 + 14));
+    const dragging = p.state === 'drag';
+    const ghost = p.state === 'ghost';
+    const seatList = [];
+    for (let i = 0; i < n; i++) {
+      const a = (360 / n) * i - 90;
+      const occupied = i < filled;
+      const isTarget = i === target;
+      seatList.push({
+        tf: `rotate(${a}deg) translateX(${ring}px) rotate(${-a}deg)`,
+        bg: isTarget ? '#E4EFF9' : occupied ? '#EBD7B4' : '#FFFFFF',
+        bd: isTarget ? '2px solid #1E62A8' : occupied ? '1.5px solid #B8762A' : '1.5px dashed #C3CDD3',
+        sh: isTarget ? '0 0 0 4px rgba(30,98,168,0.16)' : 'none',
+        dot: diet.indexOf(i) >= 0 ? '#8E3B2F' : 'transparent'
+      });
+    }
+    return {
+      seatList, box, d, dHalf: d / 2, seatSize, seatHalf: seatSize / 2,
+      radius: p.shape === 'square' ? '4px' : '50%',
+      plate: ghost ? '1.5px dashed #B7C3CA' : (p.selected || dragging) ? '1.5px solid #1E62A8' : '1.5px solid #B7C3CA',
+      label: p.label ?? 'table',
+      labelSize: Number(p.labelSize ?? 11.5),
+      count: p.count ?? (filled + '/' + n),
+      countColor: filled === 0 ? '#8A959C' : filled >= n ? '#B8762A' : '#5B676F',
+      selected: !!p.selected,
+      pad: Math.max(0, Math.round(box / 2 - ring - seatSize / 2 - 4))
+    };
+  }
+}
+</script>
+</body>
+</html>

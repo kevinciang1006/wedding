@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #DFE5E8; font-family: Archivo, "Helvetica Neue", Helvetica, sans-serif; color: #171B1F; }
+  a { color: #1E62A8; text-decoration: none; }
+  a:hover { color: #17497C; text-decoration: underline; }
+  @keyframes settle { 0% { transform: scale(1.18); } 60% { transform: scale(0.96); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</helmet>
+
+<section style="display:flex;flex-direction:column;gap:14px;padding:48px 48px 0">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#5B676F">00</span>
+    <span style="font-size:15px;font-weight:600;letter-spacing:0.01em">System</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A959C">cool = tool state · warm = human state · they never mix</span>
+  </div>
+  <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap">
+    <div style="background:#FFFFFF;border:1px solid #C7D1D6;padding:20px;display:flex;gap:18px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#171B1F;border:1px solid #171B1F"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">ink<br>#171B1F</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#E8EDEF;border:1px solid #C7D1D6"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">canvas<br>#E8EDEF</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#CBD4D9;border:1px solid #C7D1D6"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">rule<br>#CBD4D9</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#1E62A8;border:1px solid #1E62A8"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">cool / tool<br>#1E62A8</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#B8762A;border:1px solid #B8762A"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">warm / seated<br>#B8762A</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:104px;height:56px;background:#8E3B2F;border:1px solid #8E3B2F"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">flag / dietary<br>#8E3B2F</div>
+      </div>
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #C7D1D6;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:420px">
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C;width:82px">ui</span>
+        <span style="font-size:19px;font-weight:600">Archivo</span>
+        <span style="font-size:12px;color:#5B676F">11 / 12 / 13 / 15 · 400 500 600</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C;width:82px">names</span>
+        <span style="font-family:Newsreader,Georgia,serif;font-size:22px">Newsreader</span>
+        <span style="font-size:12px;color:#5B676F">13 on canvas · 16–28 in chrome</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C;width:82px">data</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:17px">IBM Plex Mono</span>
+        <span style="font-size:12px;color:#5B676F">9 / 10 / 11 / 12 · dimensions, counts, keys</span>
+      </div>
+      <div style="height:1px;background:#E2E8EB"></div>
+      <div style="font-size:12px;line-height:1.5;color:#5B676F;max-width:380px;text-wrap:pretty">Cool never fills a shape a person occupies; warm never draws a tool. Grey carries the room itself — walls, grid, rulers — so the plan reads as drawing, and the guests read as content.</div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;padding:40px 48px 0">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#5B676F">01</span>
+    <span style="font-size:15px;font-weight:600">Editor — desktop</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A959C">1440 × 900 · mid-work · table 9 selected · table 13 dragging</span>
+  </div>
+
+  <div data-screen-label="01 Editor" style="width:1440px;height:900px;background:#F7F9FA;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);display:flex;flex-direction:column;overflow:hidden;position:relative">
+
+    <div style="height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 12px;background:#FFFFFF;border-bottom:1px solid #D5DEE2">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div style="width:20px;height:20px;border:1.5px solid #171B1F;position:relative">
+          <div style="position:absolute;left:3px;top:3px;width:6px;height:6px;border:1.5px solid #B8762A;border-radius:50%"></div>
+          <div style="position:absolute;right:2px;bottom:2px;width:8px;height:1.5px;background:#1E62A8"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase">Setting</span>
+      </div>
+      <div style="width:1px;height:22px;background:#DFE6E9"></div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:Newsreader,Georgia,serif;font-size:16px">Marín · Okonkwo</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#8A959C">14 jun 2026 · saved 2 min ago</span>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5B676F">room</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:#171B1F">{{roomDims}}</span>
+        <div style="display:flex;border:1px solid #CBD4D9;height:24px;overflow:hidden">
+          <div style="padding:0 9px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:{{mBg}};color:{{mFg}}">m</div>
+          <div style="padding:0 9px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:{{ftBg}};color:{{ftFg}};border-left:1px solid #CBD4D9">ft</div>
+        </div>
+      </div>
+      <div style="width:1px;height:22px;background:#DFE6E9"></div>
+      <div style="display:flex;gap:4px">
+        <div style="width:28px;height:26px;border:1px solid #CBD4D9;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;color:#3D4950">↶</div>
+        <div style="width:28px;height:26px;border:1px solid #E2E8EB;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;color:#B3BDC3">↷</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;border:1px solid #CBD4D9;height:26px;padding:0 4px;background:#fff">
+        <span style="width:18px;text-align:center;font-size:13px;color:#3D4950">−</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;width:38px;text-align:center">100%</span>
+        <span style="width:18px;text-align:center;font-size:13px;color:#3D4950">+</span>
+      </div>
+      <div style="height:28px;padding:0 14px;background:#171B1F;color:#FFFFFF;display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500">Export plan<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#93A0A7">⌘E</span></div>
+      <div style="display:flex;border:1px solid #CBD4D9;height:26px;overflow:hidden">
+        <div style="padding:0 8px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#171B1F;color:#fff">EN</div>
+        <div style="padding:0 8px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;color:#5B676F;border-left:1px solid #CBD4D9">ES</div>
+      </div>
+    </div>
+
+    <div style="flex:1;display:flex;min-height:0">
+
+      <div style="width:200px;flex:none;background:#F2F5F7;border-right:1px solid #D5DEE2;display:flex;flex-direction:column">
+        <div style="padding:12px 12px 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Place</div>
+        <div style="display:flex;flex-direction:column;padding:0 8px;gap:1px">
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;background:#E4EFF9;border:1px solid #1E62A8">
+            <div style="width:18px;height:18px;border:1.5px solid #171B1F;border-radius:50%"></div>
+            <span style="font-size:12.5px;flex:1">Round table</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#1E62A8">10</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:16px;height:16px;border:1.5px solid #3D4950;border-radius:50%"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Round table</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">8</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:20px;height:11px;border:1.5px solid #3D4950;border-radius:2px"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Banquet table</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">12</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:14px;height:9px;border:1.5px solid #3D4950;border-radius:2px"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Sweetheart table</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">2</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:22px;height:7px;border:1.5px solid #3D4950;border-radius:1px"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Head table</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">14</span>
+          </div>
+        </div>
+        <div style="padding:14px 12px 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Room</div>
+        <div style="display:flex;flex-direction:column;padding:0 8px;gap:1px">
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:20px;height:16px;border:1.5px dashed #3D4950"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Dance floor</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:20px;height:8px;background:#DDE4E8;border:1.5px solid #3D4950"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Bar</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:20px;height:2px;background:#3D4950"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Wall</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:20px;height:8px;border-bottom:2px solid #3D4950;border-left:2px solid #3D4950"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Door</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px;border:1px solid transparent">
+            <div style="width:12px;height:12px;background:#3D4950;border-radius:50%"></div>
+            <span style="font-size:12.5px;flex:1;color:#3D4950">Column</span>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="border-top:1px solid #DFE6E9;padding:10px 12px;display:flex;flex-direction:column;gap:5px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">T  new table</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">⌥ drag  duplicate</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">esc  cancel</div>
+        </div>
+      </div>
+
+      <div style="flex:1;position:relative;background:#E8EDEF;min-width:0">
+        <div style="position:absolute;left:0;top:0;width:28px;height:28px;background:#FFFFFF;border-right:1px solid #C6D0D6;border-bottom:1px solid #C6D0D6;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#3D4950;z-index:3">{{unit}}</div>
+
+        <div style="position:absolute;left:28px;top:0;right:0;height:28px;background:#FFFFFF;border-bottom:1px solid #C6D0D6;overflow:hidden;z-index:2">
+          <div style="position:absolute;left:28px;top:0;width:836px;height:27px">
+            <div style="position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(to right,#A7B3B9 0 1px,transparent 1px 38px)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:10px;background:repeating-linear-gradient(to right,#6E7C84 0 1px,transparent 1px 190px)"></div>
+            <span style="position:absolute;left:3px;top:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">0</span>
+            <span style="position:absolute;left:193px;top:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">5</span>
+            <span style="position:absolute;left:383px;top:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">10</span>
+            <span style="position:absolute;left:763px;top:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">20</span>
+            <sc-if value="{{showRulerHighlight}}" hint-placeholder-val="{{ true }}">
+              <div style="position:absolute;left:536px;top:0;width:68px;height:27px;background:#DCE9F5;border-left:1px solid #1E62A8;border-right:1px solid #1E62A8"></div>
+              <div style="position:absolute;left:536px;bottom:0;width:68px;height:2px;background:#1E62A8"></div>
+              <div style="position:absolute;left:536px;top:3px;width:68px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#17497C">{{extent}}</div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:0;top:28px;width:28px;bottom:0;background:#FFFFFF;border-right:1px solid #C6D0D6;overflow:hidden;z-index:2">
+          <div style="position:absolute;top:116px;left:0;width:27px;height:532px">
+            <div style="position:absolute;top:0;bottom:0;right:0;width:5px;background:repeating-linear-gradient(to bottom,#A7B3B9 0 1px,transparent 1px 38px)"></div>
+            <div style="position:absolute;top:0;bottom:0;right:0;width:10px;background:repeating-linear-gradient(to bottom,#6E7C84 0 1px,transparent 1px 190px)"></div>
+            <span style="position:absolute;top:2px;left:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">0</span>
+            <span style="position:absolute;top:192px;left:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">5</span>
+            <span style="position:absolute;top:382px;left:2px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5B676F">10</span>
+            <sc-if value="{{showRulerHighlight}}" hint-placeholder-val="{{ true }}">
+              <div style="position:absolute;top:251px;left:0;width:27px;height:68px;background:rgba(30,98,168,0.13);border-top:1px solid #1E62A8;border-bottom:1px solid #1E62A8"></div>
+              <div style="position:absolute;top:251px;right:0;width:2px;height:68px;background:#1E62A8"></div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:28px;top:28px;right:0;bottom:0;overflow:hidden">
+
+          <div style="position:absolute;left:28px;top:116px;width:836px;height:532px;background:#FFFFFF;border:2px solid #2B343A;box-shadow:0 1px 0 rgba(20,32,40,0.06)">
+            <div style="position:absolute;inset:0;background:repeating-linear-gradient(to right,#EDF1F3 0 1px,transparent 1px 38px),repeating-linear-gradient(to bottom,#EDF1F3 0 1px,transparent 1px 38px),repeating-linear-gradient(to right,#E2E9EC 0 1px,transparent 1px 190px),repeating-linear-gradient(to bottom,#E2E9EC 0 1px,transparent 1px 190px)"></div>
+
+            <div style="position:absolute;left:380px;bottom:-2px;width:80px;height:2px;background:#FFFFFF"></div>
+            <div style="position:absolute;left:380px;bottom:-2px;width:80px;height:14px;border-left:2px solid #2B343A;border-right:2px solid #2B343A"></div>
+            <div style="position:absolute;left:380px;bottom:-24px;width:80px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.08em;color:#5B676F;text-transform:uppercase">entrance</div>
+
+            <div style="position:absolute;left:295px;top:24px;width:246px;height:38px;background:#FFFFFF;border:1.5px solid #B7C3CA;display:flex;align-items:center;justify-content:center">
+              <span style="font-family:Newsreader,Georgia,serif;font-size:13px">head table</span>
+              <span style="position:absolute;right:8px;bottom:3px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#B8762A">14/14</span>
+            </div>
+            <div style="position:absolute;left:295px;top:4px;width:246px;height:16px;display:flex;justify-content:space-between;padding:0 4px">
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+              <div style="width:15px;height:15px;border-radius:50%;background:#EBD7B4;border:1.5px solid #B8762A"></div>
+            </div>
+
+            <div style="position:absolute;left:323px;top:209px;width:190px;height:152px;border:1.5px dashed #B7C3CA;background:repeating-linear-gradient(45deg,#F6F8F9 0 6px,#FFFFFF 6px 12px);display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">dance floor</span>
+            </div>
+
+            <div style="position:absolute;left:700px;top:16px;width:114px;height:34px;background:#F2F5F7;border:1.5px solid #B7C3CA;display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#5B676F;text-transform:uppercase">bar</span>
+            </div>
+
+            <dc-import name="Table" label="table 1" seats="10" filled="10" diet="2,7" style="position:absolute;left:38px;top:57px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 2" seats="10" filled="10" style="position:absolute;left:190px;top:57px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 3" seats="10" filled="10" diet="4" style="position:absolute;left:38px;top:209px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 4" seats="10" filled="10" style="position:absolute;left:190px;top:209px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 5" seats="8" filled="8" style="position:absolute;left:38px;top:361px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 6" seats="8" filled="5" style="position:absolute;left:190px;top:361px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 7" seats="10" filled="10" style="position:absolute;left:494px;top:57px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 8" seats="10" filled="10" diet="1" style="position:absolute;left:646px;top:57px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 9" seats="10" filled="10" diet="3,8" selected="{{ true }}" style="position:absolute;left:494px;top:209px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 10" seats="8" filled="8" style="position:absolute;left:646px;top:209px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 11" seats="8" filled="8" style="position:absolute;left:494px;top:361px" hint-size="152px,152px"></dc-import>
+            <dc-import name="Table" label="table 12" seats="8" filled="5" target="5" style="position:absolute;left:646px;top:361px" hint-size="152px,152px"></dc-import>
+
+            <sc-if value="{{showGuides}}" hint-placeholder-val="{{ true }}">
+              <div style="position:absolute;left:0;right:0;top:437px;height:1px;background:#1E62A8"></div>
+              <div style="position:absolute;left:418px;top:0;bottom:0;width:1px;background:#1E62A8"></div>
+              <div style="position:absolute;left:412px;top:431px;width:13px;height:13px;border:1.5px solid #1E62A8;background:rgba(255,255,255,0.9)"></div>
+              <div style="position:absolute;left:266px;top:505px;width:153px;height:1px;background:repeating-linear-gradient(to right,#1E62A8 0 3px,transparent 3px 6px)"></div>
+              <div style="position:absolute;left:266px;top:494px;width:1px;height:18px;background:#9CC4E8"></div>
+              <div style="position:absolute;left:418px;top:494px;width:1px;height:18px;background:#9CC4E8"></div>
+              <div style="position:absolute;left:319px;top:496px;padding:1px 5px;background:#1E62A8;color:#FFFFFF;font-family:'IBM Plex Mono',monospace;font-size:9.5px;line-height:1.3">{{gap}}</div>
+              <div style="position:absolute;left:348px;top:94px;padding:2px 6px;background:#FFFFFF;border:1px solid #1E62A8;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#17497C;line-height:1.3">{{snapLabel}}</div>
+            </sc-if>
+
+            <dc-import name="Table" label="table 13" seats="8" filled="0" state="drag" style="position:absolute;left:342px;top:361px;filter:drop-shadow(0 6px 14px rgba(20,32,40,0.18))" hint-size="152px,152px"></dc-import>
+          </div>
+
+          <div style="position:absolute;left:694px;top:614px;display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 8px;white-space:nowrap;background:#FFFFFF;border:1px solid #1E62A8;box-shadow:0 8px 18px rgba(20,32,40,0.22);transform:rotate(-1.5deg)">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+              <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+              <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+            </div>
+            <span style="font-size:12.5px;font-weight:500">Rosa Iglesias</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">GF</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1E62A8">seat 6</span>
+          </div>
+
+          <div style="position:absolute;left:20px;bottom:20px;width:280px;background:#FFFFFF;border:1px solid #9EAEB8;box-shadow:0 2px 10px rgba(20,32,40,0.10)">
+            <div style="display:flex;align-items:baseline;gap:8px;padding:8px 10px;border-bottom:1px solid #E2E8EB;background:#F7F9FA">
+              <span style="font-family:Newsreader,Georgia,serif;font-size:14px">table 9</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.06em;color:#5B676F;text-transform:uppercase">round · 10 seats · 10 seated</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #E2E8EB">
+              <div style="padding:7px 10px;border-right:1px solid #E2E8EB">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">W</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{extent}}</div>
+              </div>
+              <div style="padding:7px 10px;border-right:1px solid #E2E8EB">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">H</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{extent}}</div>
+              </div>
+              <div style="padding:7px 10px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">R</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">0°</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr">
+              <div style="padding:7px 10px;border-right:1px solid #E2E8EB">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">X</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:#17497C">{{posX}}</div>
+              </div>
+              <div style="padding:7px 10px;border-right:1px solid #E2E8EB">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">Y</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:#17497C">{{posY}}</div>
+              </div>
+              <div style="padding:7px 10px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C">CLEAR</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{gap}}</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid #E2E8EB;padding:6px 10px;display:flex;gap:12px;background:#F7F9FA">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">⇧ constrain</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">G snap {{snapStep}}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">R rotate</span>
+            </div>
+          </div>
+
+          <div style="position:absolute;right:20px;bottom:20px;display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;background:#FFFFFF;border:1px solid #CBD4D9">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F">fit</span>
+            <span style="width:1px;height:14px;background:#E2E8EB"></span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#171B1F">1 : 50</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:320px;flex:none;background:#FFFFFF;border-left:1px solid #D5DEE2;display:flex;flex-direction:column">
+        <div style="padding:12px 14px 10px;border-bottom:1px solid #E2E8EB">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13.5px;font-weight:600">Guests</span>
+            <span style="font-size:12px;color:#1E62A8">Add guest</span>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#5B676F;margin-top:6px">142 guests · <span style="color:#B8762A">118 seated</span> · 24 unseated</div>
+          <div style="margin-top:8px;height:5px;background:#EDF1F3;display:flex">
+            <div style="width:83%;background:#B8762A"></div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #E2E8EB">
+          <div style="height:30px;border:1px solid #CBD4D9;display:flex;align-items:center;padding:0 8px;gap:8px">
+            <span style="font-size:12px;color:#8A959C;flex:1">Search guests or tables</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C;border:1px solid #E2E8EB;padding:1px 4px">⌘K</span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="height:24px;padding:0 9px;display:flex;align-items:center;background:#171B1F;color:#FFF;font-size:11.5px">All 142</div>
+            <div style="height:24px;padding:0 9px;display:flex;align-items:center;border:1px solid #CBD4D9;font-size:11.5px;color:#3D4950">Unseated 24</div>
+            <div style="flex:1"></div>
+            <div style="height:24px;padding:0 9px;display:flex;align-items:center;border:1px solid #CBD4D9;font-size:11.5px;color:#3D4950">Group ▾</div>
+          </div>
+        </div>
+
+        <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 6px;background:#F7F9FA;border-bottom:1px solid #EDF1F3">
+            <span style="font-size:10px;color:#5B676F">▾</span>
+            <span style="font-size:11.5px;font-weight:600;letter-spacing:0.02em;flex:1">Family — Marín</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">24 · 22 seated</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:8px 14px">
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #E2E8EB;background:#FFFFFF">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Ana Marín</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">GF</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t9·4</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #E2E8EB;background:#FFFFFF">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Julio Marín</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t9·5</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #E2E8EB;background:#FFFFFF">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Pilar Ruiz</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">VG</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t9·6</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #CBD4D9;background:#F7F9FA">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+                <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+                <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;border:1.5px solid #B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Marta Marín</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">unseated</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 6px;background:#F7F9FA;border-top:1px solid #EDF1F3;border-bottom:1px solid #EDF1F3">
+            <span style="font-size:10px;color:#5B676F">▾</span>
+            <span style="font-size:11.5px;font-weight:600;flex:1">Family — Okonkwo</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">22 · 22 seated</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:8px 14px">
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #E2E8EB">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Chidi Okonkwo</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t7·1</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border:1px solid #E2E8EB">
+              <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+                <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+              <span style="font-size:12.5px;flex:1">Ifeoma Okonkwo</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">NUT</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t7·2</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 6px;background:#F7F9FA;border-top:1px solid #EDF1F3">
+            <span style="font-size:10px;color:#5B676F">▸</span>
+            <span style="font-size:11.5px;font-weight:600;flex:1">College friends</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">18 · 12 seated</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 6px;background:#F7F9FA;border-top:1px solid #EDF1F3">
+            <span style="font-size:10px;color:#5B676F">▸</span>
+            <span style="font-size:11.5px;font-weight:600;flex:1">Work — Ana</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">12 · 4 seated</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 6px;background:#F7F9FA;border-top:1px solid #EDF1F3;border-bottom:1px solid #EDF1F3">
+            <span style="font-size:10px;color:#5B676F">▸</span>
+            <span style="font-size:11.5px;font-weight:600;flex:1">Plus ones</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">9 · 3 seated</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #E2E8EB;padding:10px 14px;display:flex;align-items:center;gap:10px;background:#F7F9FA">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F;flex:1">14 seats free</span>
+          <div style="height:26px;padding:0 10px;border:1px solid #171B1F;display:flex;align-items:center;font-size:12px">Seat remaining</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;padding:40px 48px 0">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#5B676F">02</span>
+    <span style="font-size:15px;font-weight:600">Guest panel &amp; interaction states</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A959C">chip mid-drag · seat states · snap feedback</span>
+  </div>
+  <div style="display:flex;gap:24px;align-items:flex-start">
+
+    <div data-screen-label="02 Guest panel" style="flex:none;width:360px;height:860px;background:#FFFFFF;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:14px 16px 12px;border-bottom:1px solid #E2E8EB">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:14px;font-weight:600">Guests</span>
+          <span style="font-size:12px;color:#1E62A8">Add guest</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5B676F;margin-top:7px">142 guests · <span style="color:#B8762A">118 seated</span> · 24 unseated</div>
+        <div style="margin-top:9px;height:5px;background:#EDF1F3;display:flex">
+          <div style="width:83%;background:#B8762A"></div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:9px;border-bottom:1px solid #E2E8EB">
+        <div style="height:32px;border:1.5px solid #1E62A8;box-shadow:0 0 0 3px rgba(30,98,168,0.18);display:flex;align-items:center;padding:0 9px;gap:8px">
+          <span style="font-size:12.5px;color:#171B1F;flex:1">iglesias<span style="display:inline-block;width:1px;height:14px;background:#1E62A8;vertical-align:-3px;margin-left:1px"></span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">3 matches</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="height:25px;padding:0 9px;display:flex;align-items:center;border:1px solid #CBD4D9;font-size:11.5px;color:#3D4950">All 142</div>
+          <div style="height:25px;padding:0 9px;display:flex;align-items:center;background:#171B1F;color:#FFF;font-size:11.5px">Unseated 24</div>
+          <div style="height:25px;padding:0 9px;display:flex;align-items:center;border:1px solid #CBD4D9;font-size:11.5px;color:#3D4950">Dietary 11</div>
+          <div style="height:25px;padding:0 9px;display:flex;align-items:center;border:1px solid #CBD4D9;font-size:11.5px;color:#3D4950">Group ▾</div>
+        </div>
+      </div>
+
+      <div style="flex:1;position:relative;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 16px 7px;background:#F7F9FA;border-bottom:1px solid #EDF1F3">
+          <span style="font-size:10px;color:#5B676F">▾</span>
+          <span style="font-size:11.5px;font-weight:600;flex:1">Family — Marín</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">24 · 22 seated</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;padding:9px 16px">
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+            <span style="font-size:12.5px;flex:1">Ana Marín</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">GF</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t9·4</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#B8762A"></div>
+            <span style="font-size:12.5px;flex:1">Julio Marín</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">t9·5</span>
+          </div>
+          <div style="height:32px;border:1px dashed #1E62A8;background:#F2F7FC;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1E62A8">moving to table 12</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;border:1.5px solid #B8762A"></div>
+            <span style="font-size:12.5px;flex:1">Marta Marín</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">unseated</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB;background:#FBFCFC">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#D6DDE1"></div>
+            <span style="font-size:12.5px;flex:1;color:#8A959C;text-decoration:line-through">Tomás Marín</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">declined</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 16px 7px;background:#F7F9FA;border-top:1px solid #EDF1F3;border-bottom:1px solid #EDF1F3">
+          <span style="font-size:10px;color:#5B676F">▾</span>
+          <span style="font-size:11.5px;font-weight:600;flex:1">Work — Ana</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">12 · 4 seated</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;padding:9px 16px">
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;border:1.5px solid #B8762A"></div>
+            <span style="font-size:12.5px;flex:1">Lucía Iglesias</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">DF</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">unseated</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;border:1px solid #E2E8EB">
+            <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+              <div style="width:2px;height:2px;background:#B3BDC3"></div><div style="width:2px;height:2px;background:#B3BDC3"></div>
+            </div>
+            <div style="width:7px;height:7px;border-radius:50%;border:1.5px solid #B8762A"></div>
+            <span style="font-size:12.5px;flex:1">Marc Iglesias</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">unseated</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 16px 7px;background:#F7F9FA;border-top:1px solid #EDF1F3;border-bottom:1px solid #EDF1F3">
+          <span style="font-size:10px;color:#5B676F">▸</span>
+          <span style="font-size:11.5px;font-weight:600;flex:1">Plus ones</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A959C">9 · 3 seated</span>
+        </div>
+
+        <div style="position:absolute;left:96px;top:112px;display:flex;align-items:center;gap:9px;height:32px;white-space:nowrap;padding:0 10px;background:#FFFFFF;border:1px solid #1E62A8;box-shadow:0 10px 22px rgba(20,32,40,0.24);transform:rotate(-2deg)">
+          <div style="display:grid;grid-template-columns:2px 2px;gap:2px">
+            <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+            <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+            <div style="width:2px;height:2px;background:#8A959C"></div><div style="width:2px;height:2px;background:#8A959C"></div>
+          </div>
+          <span style="font-size:12.5px;font-weight:500">Rosa Iglesias</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">GF</span>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #E2E8EB;padding:11px 16px;display:flex;align-items:center;gap:10px;background:#F7F9FA">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F;flex:1">14 seats free</span>
+        <div style="height:27px;padding:0 11px;border:1px solid #171B1F;display:flex;align-items:center;font-size:12px">Seat remaining</div>
+      </div>
+    </div>
+
+    <div style="flex:none;width:660px;background:#FFFFFF;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);padding:24px;display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Seat states</div>
+        <div style="display:flex;gap:26px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:96px">
+            <div style="width:26px;height:26px;border-radius:50%;border:1.5px dashed #C3CDD3;background:#FFF"></div>
+            <div style="font-size:11.5px">empty</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C;text-align:center">dashed rule<br>no fill</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:96px">
+            <div style="width:26px;height:26px;border-radius:50%;border:2px solid #1E62A8;background:#E4EFF9;box-shadow:0 0 0 4px rgba(30,98,168,0.16)"></div>
+            <div style="font-size:11.5px">drop target</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C;text-align:center">cool ring<br>on hover</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:96px">
+            <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+            <div style="font-size:11.5px">occupied</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C;text-align:center">warm fill<br>guest seated</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:96px">
+            <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4;display:flex;align-items:center;justify-content:center">
+              <div style="width:6px;height:6px;border-radius:50%;background:#8E3B2F"></div>
+            </div>
+            <div style="font-size:11.5px">dietary</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C;text-align:center">flag dot<br>GF VG DF NUT</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:96px">
+            <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4;animation:settle 320ms cubic-bezier(.2,.9,.3,1.2)"></div>
+            <div style="font-size:11.5px">just seated</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8A959C;text-align:center">320 ms settle<br>only motion here</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:#E2E8EB"></div>
+
+      <div style="display:flex;gap:28px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Drop target on canvas</div>
+          <div style="width:240px;height:200px;background:#FFFFFF;border:1px solid #E2E8EB;position:relative;background-image:repeating-linear-gradient(to right,#EDF1F3 0 1px,transparent 1px 38px),repeating-linear-gradient(to bottom,#EDF1F3 0 1px,transparent 1px 38px)">
+            <dc-import name="Table" label="table 12" seats="8" filled="5" target="5" style="position:absolute;left:44px;top:24px" hint-size="152px,152px"></dc-import>
+            <div style="position:absolute;left:14px;bottom:12px;display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;background:#FFFFFF;border:1px solid #1E62A8;box-shadow:0 6px 14px rgba(20,32,40,0.18)">
+              <span style="font-size:11.5px">Rosa Iglesias</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#1E62A8">seat 6</span>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Snap &amp; transformer</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:120px;height:26px;position:relative">
+                <div style="position:absolute;left:0;right:0;top:12px;height:1px;background:#1E62A8"></div>
+                <div style="position:absolute;left:56px;top:6px;width:13px;height:13px;border:1.5px solid #1E62A8;background:#FFF"></div>
+              </div>
+              <div style="font-size:12px;color:#3D4950;flex:1">Alignment guide — 1 px cool line, square node at the matched centre. Appears on snap, disappears on release.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:120px;height:26px;position:relative">
+                <div style="position:absolute;left:0;right:0;top:12px;height:1px;background:repeating-linear-gradient(to right,#1E62A8 0 3px,transparent 3px 6px)"></div>
+                <div style="position:absolute;left:34px;top:2px;padding:1px 5px;background:#1E62A8;color:#FFF;font-family:'IBM Plex Mono',monospace;font-size:9.5px">4.00 m</div>
+              </div>
+              <div style="font-size:12px;color:#3D4950;flex:1">Distance to the nearest neighbour, live while dragging. Snap step 0.25 m, hold G to release it.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:120px;height:34px;position:relative">
+                <div style="position:absolute;left:20px;top:2px;width:80px;height:30px;border:1px dashed #1E62A8;background:rgba(30,98,168,0.05)"></div>
+                <div style="position:absolute;left:16px;top:-2px;width:8px;height:8px;border:1.5px solid #1E62A8;background:#FFF"></div>
+                <div style="position:absolute;left:96px;top:-2px;width:8px;height:8px;border:1.5px solid #1E62A8;background:#FFF"></div>
+                <div style="position:absolute;left:16px;top:28px;width:8px;height:8px;border:1.5px solid #1E62A8;background:#FFF"></div>
+                <div style="position:absolute;left:96px;top:28px;width:8px;height:8px;border:1.5px solid #1E62A8;background:#FFF"></div>
+              </div>
+              <div style="font-size:12px;color:#3D4950;flex:1">Transformer — square handles, same 1.5 px weight as the ruler caps. Rotation handle above the top edge.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:#E2E8EB"></div>
+
+      <div style="display:flex;gap:28px;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:12px;width:300px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">RSVP &amp; dietary</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:#B8762A"></div><span style="font-size:12px">confirmed</span></div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;border:1.5px solid #B8762A"></div><span style="font-size:12px">waiting on a reply</span></div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:#D6DDE1"></div><span style="font-size:12px;color:#8A959C">declined — kept, not seated</span></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">GF</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">VG</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">DF</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8E3B2F;border:1px solid #E0C4BE;padding:0 3px">NUT</span>
+              <span style="font-size:12px;color:#5B676F">11 guests flagged</span>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Confirmation</div>
+          <div style="display:inline-flex;align-items:center;gap:12px;padding:11px 14px;background:#171B1F;color:#FFFFFF;align-self:flex-start">
+            <span style="font-size:12.5px">Plan exported</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9FAAB1">marin-okonkwo-plan.pdf</span>
+            <span style="font-size:12px;color:#9CC4E8">Show file</span>
+          </div>
+          <div style="font-size:12px;color:#5B676F;text-wrap:pretty">Errors name the fix: “Table 12 has 5 seats left and 24 guests are unseated. Add a table or raise the seat count.”</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;padding:40px 48px 0">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#5B676F">03</span>
+    <span style="font-size:15px;font-weight:600">Empty state</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A959C">first load · two equal ways in</span>
+  </div>
+  <div data-screen-label="03 Empty state" style="width:1440px;height:900px;background:#F7F9FA;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);display:flex;flex-direction:column;overflow:hidden">
+    <div style="height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 12px;background:#FFFFFF;border-bottom:1px solid #D5DEE2">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div style="width:20px;height:20px;border:1.5px solid #171B1F;position:relative">
+          <div style="position:absolute;left:3px;top:3px;width:6px;height:6px;border:1.5px solid #B8762A;border-radius:50%"></div>
+          <div style="position:absolute;right:2px;bottom:2px;width:8px;height:1.5px;background:#1E62A8"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase">Setting</span>
+      </div>
+      <div style="width:1px;height:22px;background:#DFE6E9"></div>
+      <span style="font-family:Newsreader,Georgia,serif;font-size:16px;color:#8A959C">Untitled plan</span>
+      <div style="flex:1"></div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#B3BDC3">no room set</span>
+      <div style="height:28px;padding:0 14px;border:1px solid #DFE6E9;color:#B3BDC3;display:flex;align-items:center;font-size:12.5px">Export plan</div>
+      <div style="display:flex;border:1px solid #CBD4D9;height:26px;overflow:hidden">
+        <div style="padding:0 8px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#171B1F;color:#fff">EN</div>
+        <div style="padding:0 8px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;color:#5B676F;border-left:1px solid #CBD4D9">ES</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;min-height:0">
+      <div style="width:200px;flex:none;background:#F2F5F7;border-right:1px solid #D5DEE2;display:flex;flex-direction:column;opacity:0.45">
+        <div style="padding:12px 12px 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Place</div>
+        <div style="display:flex;flex-direction:column;padding:0 8px;gap:1px">
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px"><div style="width:18px;height:18px;border:1.5px solid #8A959C;border-radius:50%"></div><span style="font-size:12.5px;color:#8A959C">Round table</span></div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px"><div style="width:20px;height:11px;border:1.5px solid #8A959C;border-radius:2px"></div><span style="font-size:12.5px;color:#8A959C">Banquet table</span></div>
+          <div style="display:flex;align-items:center;gap:10px;height:32px;padding:0 8px"><div style="width:22px;height:7px;border:1.5px solid #8A959C;border-radius:1px"></div><span style="font-size:12.5px;color:#8A959C">Head table</span></div>
+        </div>
+      </div>
+      <div style="flex:1;position:relative;background:#E8EDEF;min-width:0">
+        <div style="position:absolute;left:0;top:0;width:28px;height:28px;background:#FFFFFF;border-right:1px solid #C6D0D6;border-bottom:1px solid #C6D0D6;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#B3BDC3">m</div>
+        <div style="position:absolute;left:28px;top:0;right:0;height:28px;background:#FFFFFF;border-bottom:1px solid #C6D0D6;overflow:hidden">
+          <div style="position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(to right,#DCE3E7 0 1px,transparent 1px 38px)"></div>
+        </div>
+        <div style="position:absolute;left:0;top:28px;width:28px;bottom:0;background:#FFFFFF;border-right:1px solid #C6D0D6;overflow:hidden">
+          <div style="position:absolute;top:0;bottom:0;right:0;width:5px;background:repeating-linear-gradient(to bottom,#DCE3E7 0 1px,transparent 1px 38px)"></div>
+        </div>
+        <div style="position:absolute;left:28px;top:28px;right:0;bottom:0;display:flex;align-items:center;justify-content:center">
+          <div style="width:620px;display:flex;flex-direction:column;gap:22px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:Newsreader,Georgia,serif;font-size:30px;line-height:1.1">Start your floor plan</div>
+              <div style="font-size:13.5px;color:#5B676F;max-width:480px;text-wrap:pretty">Set the room, place tables, then drag guests into seats. Everything can be renamed or moved later.</div>
+            </div>
+            <div style="display:flex;gap:16px">
+              <div style="flex:1;background:#FFFFFF;border:1.5px solid #171B1F;padding:18px;display:flex;flex-direction:column;gap:12px">
+                <div style="height:72px;position:relative;background:#F7F9FA;border:1px solid #E2E8EB;overflow:hidden">
+                  <div style="position:absolute;left:16px;top:14px;width:22px;height:22px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+                  <div style="position:absolute;left:50px;top:14px;width:22px;height:22px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+                  <div style="position:absolute;left:84px;top:14px;width:22px;height:22px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+                  <div style="position:absolute;left:16px;top:44px;width:22px;height:22px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+                  <div style="position:absolute;left:50px;top:44px;width:22px;height:22px;border-radius:50%;border:1.5px solid #B8762A;background:#EBD7B4"></div>
+                  <div style="position:absolute;left:84px;top:44px;width:22px;height:22px;border-radius:50%;border:1.5px solid #C3CDD3;border-style:dashed;background:#FFF"></div>
+                  <div style="position:absolute;left:124px;top:14px;width:96px;height:12px;background:#FFF;border:1.5px solid #B7C3CA"></div>
+                  <div style="position:absolute;left:124px;top:38px;width:96px;height:28px;border:1.5px dashed #B7C3CA"></div>
+                </div>
+                <div style="font-size:14px;font-weight:600">Start from a sample wedding</div>
+                <div style="font-size:12.5px;color:#5B676F;line-height:1.5;flex:1;text-wrap:pretty">A 120-guest layout: twelve round tables, a head table and a dance floor in a 22 × 14 m room. Rename or clear anything.</div>
+                <div style="height:32px;background:#171B1F;color:#FFF;display:flex;align-items:center;justify-content:center;font-size:12.5px">Open the sample</div>
+              </div>
+              <div style="flex:1;background:#FFFFFF;border:1.5px solid #171B1F;padding:18px;display:flex;flex-direction:column;gap:12px">
+                <div style="height:72px;position:relative;background:#F7F9FA;border:1px solid #E2E8EB;overflow:hidden">
+                  <div style="position:absolute;left:16px;top:12px;right:16px;bottom:12px;border:1.5px solid #2B343A"></div>
+                  <div style="position:absolute;left:16px;top:4px;right:16px;height:1px;background:repeating-linear-gradient(to right,#1E62A8 0 3px,transparent 3px 6px)"></div>
+                  <div style="position:absolute;left:88px;top:-2px;padding:0 4px;background:#1E62A8;color:#FFF;font-family:'IBM Plex Mono',monospace;font-size:8px">22.00 m</div>
+                </div>
+                <div style="font-size:14px;font-weight:600">Start empty</div>
+                <div style="font-size:12.5px;color:#5B676F;line-height:1.5;flex:1;text-wrap:pretty">Enter the room dimensions from the venue and place the first table yourself. Snapping is on from the start.</div>
+                <div style="height:32px;background:#171B1F;color:#FFF;display:flex;align-items:center;justify-content:center;font-size:12.5px">Set the room size</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding-top:2px">
+              <span style="font-size:12.5px;color:#5B676F">Already have a guest list?</span>
+              <a href="#03" style="font-size:12.5px">Import a .csv</a>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">names, group, dietary, rsvp</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="width:320px;flex:none;background:#FFFFFF;border-left:1px solid #D5DEE2;display:flex;flex-direction:column">
+        <div style="padding:12px 14px 10px;border-bottom:1px solid #E2E8EB;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13.5px;font-weight:600">Guests</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#8A959C">0</span>
+        </div>
+        <div style="padding:18px 14px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12.5px;color:#5B676F;line-height:1.5;text-wrap:pretty">Guests land here. Import a list or add them one at a time — you can seat them before the room is finished.</div>
+          <div style="height:30px;border:1px solid #171B1F;display:flex;align-items:center;justify-content:center;font-size:12px">Import guest list</div>
+          <div style="height:30px;border:1px solid #CBD4D9;display:flex;align-items:center;justify-content:center;font-size:12px;color:#3D4950">Add a guest</div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="border-top:1px solid #E2E8EB;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">csv · xlsx · paste from a spreadsheet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;padding:40px 48px 64px">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#5B676F">04</span>
+    <span style="font-size:15px;font-weight:600">Mobile viewer</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A959C">390 × 844 · read-only · “where am I sitting”</span>
+  </div>
+  <div style="display:flex;gap:24px;align-items:flex-start">
+    <div data-screen-label="04 Mobile viewer" style="flex:none;width:390px;height:844px;background:#FFFFFF;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:14px 16px 12px;border-bottom:1px solid #E2E8EB;display:flex;align-items:center;gap:10px">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+          <span style="font-family:Newsreader,Georgia,serif;font-size:19px;line-height:1.1">Marín · Okonkwo</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">14 jun 2026 · finca el olivar</span>
+        </div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F;border:1px solid #CBD4D9;padding:2px 5px">view only</span>
+        <div style="display:flex;border:1px solid #CBD4D9;height:24px;overflow:hidden">
+          <div style="padding:0 7px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;background:#171B1F;color:#fff">EN</div>
+          <div style="padding:0 7px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5B676F;border-left:1px solid #CBD4D9">ES</div>
+        </div>
+      </div>
+
+      <div style="padding:14px 16px 10px">
+        <div style="height:48px;border:1.5px solid #1E62A8;box-shadow:0 0 0 3px rgba(30,98,168,0.18);display:flex;align-items:center;padding:0 12px;gap:10px">
+          <span style="font-size:15px;flex:1">ana marín</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A959C">clear</span>
+        </div>
+        <div style="font-size:12px;color:#5B676F;margin-top:8px">Type your name to find your seat.</div>
+      </div>
+
+      <div style="margin:4px 16px 0;border:1px solid #B8762A;background:#F9F2E7;padding:14px">
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span style="font-family:Newsreader,Georgia,serif;font-size:22px">Ana Marín</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A6120">gf</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px">
+          <span style="font-family:Newsreader,Georgia,serif;font-size:26px;color:#171B1F">table 9</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A6120">seat 4</span>
+        </div>
+        <div style="font-size:12.5px;color:#5B676F;margin-top:8px">Right of the dance floor, second row from the entrance.</div>
+      </div>
+
+      <div style="margin:14px 16px 0;position:relative;height:300px;background:#E8EDEF;border:1px solid #CBD4D9;overflow:hidden">
+        <div style="position:absolute;left:11px;top:32px;width:336px;height:214px;background:#FFFFFF;border:1.5px solid #2B343A">
+          <div style="position:absolute;left:118px;top:9px;width:99px;height:14px;border:1px solid #B7C3CA"></div>
+          <div style="position:absolute;left:130px;top:84px;width:76px;height:61px;border:1px dashed #B7C3CA"></div>
+          <div style="position:absolute;left:29px;top:39px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:90px;top:39px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:29px;top:100px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:90px;top:100px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:29px;top:161px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:90px;top:161px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:218px;top:39px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:279px;top:39px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:279px;top:100px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:218px;top:161px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:279px;top:161px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:157px;top:161px;width:20px;height:20px;border-radius:50%;border:1px solid #B7C3CA;background:#FFF"></div>
+          <div style="position:absolute;left:212px;top:94px;width:32px;height:32px;border-radius:50%;border:2px solid #B8762A;background:#EBD7B4;box-shadow:0 0 0 5px rgba(184,118,42,0.18);display:flex;align-items:center;justify-content:center">
+            <span style="font-family:Newsreader,Georgia,serif;font-size:11px;color:#5C3D10">t9</span>
+          </div>
+          <div style="position:absolute;left:238px;top:88px;width:9px;height:9px;border-radius:50%;background:#8E3B2F;border:1.5px solid #FFF"></div>
+        </div>
+        <div style="position:absolute;left:11px;bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F">pinch to zoom · drag to pan</div>
+        <div style="position:absolute;right:10px;bottom:8px;display:flex;flex-direction:column;border:1px solid #CBD4D9;background:#FFF">
+          <span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3D4950">+</span>
+          <span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3D4950;border-top:1px solid #E2E8EB">−</span>
+        </div>
+      </div>
+
+      <div style="padding:16px 16px 0;display:flex;flex-direction:column;gap:8px;flex:1">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">At your table</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">Julio Marín</span>
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">Pilar Ruiz</span>
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">Chidi Okonkwo</span>
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">Nkem Okonkwo</span>
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">Rosa Iglesias</span>
+          <span style="font-size:13px;padding:4px 9px;border:1px solid #E2E8EB">+ 4 more</span>
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid #E2E8EB;font-size:12px;color:#8A959C">Seating can change up to the day. Reopen this link for the latest.</div>
+    </div>
+
+    <div style="flex:none;width:420px;background:#FFFFFF;border:1px solid #B7C3CA;box-shadow:0 4px 28px rgba(20,32,40,0.12);padding:22px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Mobile — no match</div>
+      <div style="border:1px solid #E2E8EB;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="height:44px;border:1.5px solid #1E62A8;box-shadow:0 0 0 3px rgba(30,98,168,0.18);display:flex;align-items:center;padding:0 12px">
+          <span style="font-size:15px;color:#171B1F">anna marin</span>
+        </div>
+        <div style="font-size:13px;font-weight:600">No guest by that name</div>
+        <div style="font-size:12.5px;color:#5B676F;line-height:1.5;text-wrap:pretty">Check the spelling, or try the name on your invitation. If you were added late, ask the couple to reshare the plan.</div>
+      </div>
+      <div style="height:1px;background:#E2E8EB"></div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#8A959C;text-transform:uppercase">Below 768 px</div>
+      <div style="font-size:12.5px;color:#3D4950;line-height:1.6;text-wrap:pretty">Editing is desktop and tablet only. On a phone the toolbar and guest panel are replaced by search; the canvas keeps its rulers but drops the transformer, guides and the measurement readout — nothing on screen suggests an edit that cannot happen.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F;border:1px solid #CBD4D9;padding:3px 6px">tap targets ≥ 44 px</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F;border:1px solid #CBD4D9;padding:3px 6px">focus ring 3 px cool</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5B676F;border:1px solid #CBD4D9;padding:3px 6px">reduced motion honoured</span>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;unit&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;m&quot;,&quot;ft&quot;],&quot;default&quot;:&quot;m&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Measurement&quot;},&quot;showGuides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Measurement&quot;},&quot;showRulerHighlight&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Measurement&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const ft = this.props.unit === 'ft';
+    const c = (m, dp) => ft ? (m * 3.28084).toFixed(dp === undefined ? 2 : dp) + ' ft' : m.toFixed(dp === undefined ? 2 : dp) + ' m';
+    return {
+      unit: ft ? 'ft' : 'm',
+      roomDims: ft ? '72.18 × 45.93 ft' : '22.00 × 14.00 m',
+      extent: c(1.8),
+      posX: c(15),
+      posY: c(7.5),
+      gap: c(4),
+      snapStep: c(0.25),
+      snapLabel: 'snapped · y ' + c(11.5),
+      mBg: ft ? '#FFFFFF' : '#171B1F',
+      mFg: ft ? '#5B676F' : '#FFFFFF',
+      ftBg: ft ? '#171B1F' : '#FFFFFF',
+      ftFg: ft ? '#FFFFFF' : '#5B676F',
+      showGuides: this.props.showGuides ?? true,
+      showRulerHighlight: this.props.showRulerHighlight ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>
