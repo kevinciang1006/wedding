@@ -6,9 +6,7 @@ import type Konva from 'konva';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
 import { GRID_HIDE_BELOW, GRID_MAJOR, GRID_MINOR } from '@/lib/constants';
-
-const GRID_MINOR_COLOR = '#EDF1F3';
-const GRID_MAJOR_COLOR = '#E2E9EC';
+import { GRID_MAJOR_COLOR, GRID_MINOR_COLOR, ROOM_FILL, ROOM_WALL } from '@/lib/canvasTokens';
 
 function drawGridLines(ctx: Konva.Context, shape: Konva.Shape, room: { width: number; height: number }, step: number): void {
   ctx.beginPath();
@@ -70,8 +68,8 @@ export function StaticLayer() {
         y={0}
         width={room.width}
         height={room.height}
-        fill="#FFFFFF"
-        stroke="#2B343A"
+        fill={ROOM_FILL}
+        stroke={ROOM_WALL}
         strokeWidth={2}
         strokeScaleEnabled={false}
       />
