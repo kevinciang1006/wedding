@@ -147,3 +147,80 @@ describe('memoisation', () => {
     expect(b).toHaveLength(a.length);
   });
 });
+
+describe('seat angle', () => {
+  // Helper: convert angle (degrees) to unit direction vector
+  function angleToDirection(angleDeg: number): { dx: number; dy: number } {
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return {
+      dx: Math.sin(angleRad),
+      dy: -Math.cos(angleRad),
+    };
+  }
+
+  // Helper: assert that a seat's angle points toward the table centre
+  function assertAngleFacesCenter(seat: { x: number; y: number; angle: number }, cx: number = 0, cy: number = 0) {
+    const { dx, dy } = angleToDirection(seat.angle);
+    const dist = Math.hypot(seat.x - cx, seat.y - cy);
+    const expectedDx = (cx - seat.x) / dist;
+    const expectedDy = (cy - seat.y) / dist;
+    expect(dx).toBeCloseTo(expectedDx, 6);
+    expect(dy).toBeCloseTo(expectedDy, 6);
+  }
+
+  it('every round-table seat faces the centre', () => {
+    for (const seat of getSeats(round({ seatCount: 12 }))) {
+      assertAngleFacesCenter(seat);
+    }
+  });
+
+  it('every rectTable seat faces the centre', () => {
+    for (const seat of getSeats(rect)) {
+      assertAngleFacesCenter(seat);
+    }
+  });
+
+  it('every headTable seat faces the centre', () => {
+    const head: SceneObject = {
+      id: 'h1', type: 'headTable', x: 0, y: 0, rotation: 0, label: 'head table', z: 0,
+      width: 480, height: 90, seatCount: 8,
+    };
+    for (const seat of getSeats(head)) {
+      assertAngleFacesCenter(seat);
+    }
+  });
+
+  it('every sweetheart seat faces the centre', () => {
+    const sweet: SceneObject = {
+      id: 's1', type: 'sweetheart', x: 0, y: 0, rotation: 0, label: 'sweetheart', z: 0,
+      width: 150, height: 75,
+    };
+    for (const seat of getSeats(sweet)) {
+      assertAngleFacesCenter(seat);
+    }
+  });
+
+  it('seat 0 of round and headTable face the same direction (both above centre)', () => {
+    const roundSeat0 = getSeats(round({ seatCount: 8 }))[0];
+    // Single-seat headTable: the one seat is at the centre of the top edge, directly above.
+    const head: SceneObject = {
+      id: 'h1', type: 'headTable', x: 0, y: 0, rotation: 0, label: 'head table', z: 0,
+      width: 480, height: 90, seatCount: 1,
+    };
+    const headSeat0 = getSeats(head)[0];
+
+    const { dx: rd, dy: ry } = angleToDirection(roundSeat0.angle);
+    const { dx: hd, dy: hy } = angleToDirection(headSeat0.angle);
+
+    expect(rd).toBeCloseTo(hd, 6);
+    expect(ry).toBeCloseTo(hy, 6);
+  });
+
+  it('rotating a table rotates its seats\' facing directions', () => {
+    const unrotated = getSeats(round({ seatCount: 8, rotation: 0 }))[0];
+    const rotated90 = getSeats(round({ seatCount: 8, rotation: 90 }))[0];
+
+    // Angle should increase by rotation amount
+    expect(rotated90.angle - unrotated.angle).toBeCloseTo(90, 6);
+  });
+});

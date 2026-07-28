@@ -24,41 +24,45 @@ function shapeKey(obj: SceneObject): string {
   }
 }
 
-/** Seats spaced in equal slots along an edge, centred in each slot. */
-function alongEdge(count: number, width: Cm, y: Cm, facing: number): LocalSeat[] {
+/** Seats spaced in equal slots along an edge, centred in each slot. Each seat's angle points toward the table centre. */
+function alongEdge(count: number, width: Cm, y: Cm): LocalSeat[] {
   const slot = width / count;
-  return Array.from({ length: count }, (_, k) => ({
-    x: -width / 2 + slot * (k + 0.5),
-    y,
-    angle: facing,
-  }));
+  return Array.from({ length: count }, (_, k) => {
+    const x = -width / 2 + slot * (k + 0.5);
+    // Angle from this seat position toward the centre at (0, 0).
+    // Direction: (-x, -y). Angle where sin(θ) = -x/d, cos(θ) = y/d (since -cos(θ) = -y/d).
+    const angle = (Math.atan2(-x, y) * 180) / Math.PI;
+    return { x, y, angle };
+  });
 }
 
 function localSeats(obj: SceneObject): readonly LocalSeat[] {
   switch (obj.type) {
     case 'roundTable': {
       const radius = obj.diameter / 2 + SEAT_OFFSET;
-      // Starting at -pi/2 puts seat 1 at the top.
+      // Starting at -pi/2 puts seat 0 at the top.
       return Array.from({ length: obj.seatCount }, (_, i) => {
         const a = (Math.PI * 2 * i) / obj.seatCount - Math.PI / 2;
         return {
           x: Math.cos(a) * radius,
           y: Math.sin(a) * radius,
-          angle: (a * 180) / Math.PI + 90, // faces inward
+          // -90 turns the outward radial direction inward, matching the edge
+          // convention below where a seat above the table faces down (180).
+          angle: (a * 180) / Math.PI - 90,
         };
       });
     }
     case 'rectTable': {
       const y = obj.height / 2 + SEAT_OFFSET;
-      const top = alongEdge(obj.seatsPerSide, obj.width, -y, 180);
+      const top = alongEdge(obj.seatsPerSide, obj.width, -y);
       // Index down one side, then back along the other, so seat order walks the table.
-      const bottom = alongEdge(obj.seatsPerSide, obj.width, y, 0).reverse();
+      const bottom = alongEdge(obj.seatsPerSide, obj.width, y).reverse();
       return [...top, ...bottom];
     }
     case 'headTable':
-      return alongEdge(obj.seatCount, obj.width, -(obj.height / 2 + SEAT_OFFSET), 180);
+      return alongEdge(obj.seatCount, obj.width, -(obj.height / 2 + SEAT_OFFSET));
     case 'sweetheart':
-      return alongEdge(2, obj.width, -(obj.height / 2 + SEAT_OFFSET), 180);
+      return alongEdge(2, obj.width, -(obj.height / 2 + SEAT_OFFSET));
     default:
       return [];
   }
