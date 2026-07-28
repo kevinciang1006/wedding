@@ -1,0 +1,77 @@
+import { create } from 'zustand';
+import type { Guide } from '@/lib/geometry/snap';
+import type { ObjectType } from '@/lib/types/doc';
+
+interface ViewState {
+  // Konva stage transform.
+  scale: number;
+  x: number;
+  y: number;
+
+  selectedIds: string[];
+  tool: ObjectType | null;
+  gridVisible: boolean;
+  gridSnap: boolean;
+  guides: Guide[];
+  marquee: { x: number; y: number; width: number; height: number } | null;
+  dragDistance: { from: { x: number; y: number }; to: { x: number; y: number }; cm: number } | null;
+  hoveredSeatId: string | null;
+  justSeatedSeatId: string | null;
+}
+
+interface ViewActions {
+  setView: (view: Partial<Pick<ViewState, 'scale' | 'x' | 'y'>>) => void;
+  select: (ids: string[]) => void;
+  addToSelection: (id: string) => void;
+  clearSelection: () => void;
+  setTool: (tool: ObjectType | null) => void;
+  toggleGrid: () => void;
+  toggleGridSnap: () => void;
+  setGuides: (guides: Guide[]) => void;
+  setMarquee: (marquee: ViewState['marquee']) => void;
+  setDragDistance: (dragDistance: ViewState['dragDistance']) => void;
+  setHoveredSeat: (id: string | null) => void;
+  setJustSeated: (id: string | null) => void;
+}
+
+export type ViewStoreState = ViewState & ViewActions;
+
+/**
+ * Viewport, tool, and interaction-transient state — never persisted, never
+ * pushed through docStore's history.
+ *
+ * Selection lives here rather than in docStore specifically so that
+ * selecting an object is not undoable: docStore.commit() is the only path
+ * that creates a history entry, and selectedIds never passes through it.
+ * A `Cmd+Z` after clicking a table must undo the table's last edit, not
+ * silently deselect it.
+ */
+export const useViewStore = create<ViewStoreState>((set) => ({
+  scale: 1,
+  x: 0,
+  y: 0,
+  selectedIds: [],
+  tool: null,
+  gridVisible: true,
+  gridSnap: true,
+  guides: [],
+  marquee: null,
+  dragDistance: null,
+  hoveredSeatId: null,
+  justSeatedSeatId: null,
+
+  setView: (view) => set(view),
+  select: (ids) => set({ selectedIds: ids }),
+  addToSelection: (id) => set((s) => (
+    s.selectedIds.includes(id) ? {} : { selectedIds: [...s.selectedIds, id] }
+  )),
+  clearSelection: () => set({ selectedIds: [] }),
+  setTool: (tool) => set({ tool }),
+  toggleGrid: () => set((s) => ({ gridVisible: !s.gridVisible })),
+  toggleGridSnap: () => set((s) => ({ gridSnap: !s.gridSnap })),
+  setGuides: (guides) => set({ guides }),
+  setMarquee: (marquee) => set({ marquee }),
+  setDragDistance: (dragDistance) => set({ dragDistance }),
+  setHoveredSeat: (id) => set({ hoveredSeatId: id }),
+  setJustSeated: (id) => set({ justSeatedSeatId: id }),
+}));
