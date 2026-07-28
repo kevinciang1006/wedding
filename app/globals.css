@@ -49,8 +49,17 @@
   border-radius: 0;
 }
 
+/* Reserve the focus ring's border space at rest so gaining it on focus never reflows the element. */
+:where(a, button, input, select, textarea, [tabindex]) {
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: transparent;
+}
+
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: none;
+  border-style: solid;
+  border-width: 1.5px;
   border-color: var(--color-cool);
   box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
 }
