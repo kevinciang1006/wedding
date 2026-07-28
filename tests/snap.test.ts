@@ -71,7 +71,7 @@ const scale = 1; // 8 screen px === 8 cm at scale 1
 // threshold is ever evaluated, and the test then passes without testing anything.
 
 describe('alignment snapping', () => {
-  it('snaps centre-x to a neighbour just inside the threshold', () => {
+  it('snaps centre-x when only centre matching qualifies', () => {
     // A narrow neighbour, so the only candidate in range is centre-to-centre —
     // with two equal-sized boxes, left/centre/right all tie and the test cannot
     // tell which edge kind resolved the match.
@@ -162,20 +162,20 @@ describe('alignment snapping', () => {
 describe('grid snapping', () => {
   it('rounds to the 25 cm step when enabled and nothing aligned', () => {
     const r = snapPosition({
-      moving: bar('a', 0, 0), x: 508, y: 150,
+      moving: bar('a', 0, 0), x: 508, y: 311,
       others: [], stageScale: scale, gridEnabled: true,
     });
     expect(r.x).toBe(500);
-    expect(r.y).toBe(150);
+    expect(r.y).toBe(300);
   });
 
   it('defers to alignment snap on an axis that already snapped', () => {
     const r = snapPosition({
-      moving: bar('a', 0, 0), x: 512, y: 150,
+      moving: bar('a', 0, 0), x: 512, y: 311,
       others: [bar('b', 510, 100)], stageScale: scale, gridEnabled: true,
     });
     expect(r.x).toBe(510);  // alignment won, not the 500 grid line
-    expect(r.y).toBe(150);  // free axis stays at moving position (not grid-snapped away from alignment)
+    expect(r.y).toBe(300);  // free axis still grid-snapped
   });
 
   it('leaves position untouched when disabled and nothing aligns', () => {
