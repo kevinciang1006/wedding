@@ -2,6 +2,8 @@ import { applyPatches, enablePatches, produceWithPatches } from 'immer';
 import { create } from 'zustand';
 import { AUTOSAVE_MS, LS_KEY } from '@/lib/constants';
 import { PatchStack } from '@/lib/history/patchStack';
+import { assignSeat, unseatGuest } from '@/lib/doc/assignments';
+import { getSeats } from '@/lib/geometry/seats';
 import type { Doc } from '@/lib/types/doc';
 
 enablePatches();
@@ -28,6 +30,9 @@ interface DocActions {
   replaceDoc: (doc: Doc) => void;
   undo: () => void;
   redo: () => void;
+  seatGuest: (seatId: string, guestId: string) => void;
+  unseat: (guestId: string) => void;
+  seatGroupAt: (tableId: string, group: string) => void;
   canUndo: boolean;
   canRedo: boolean;
   undoLabel: string | null;
@@ -105,6 +110,34 @@ export const useDocStore = create<DocState>((set, get) => ({
     const next = applyPatches(docOf(get()), entry.patches);
     set({ ...next, ...flags() });
     scheduleSave(next);
+  },
+
+  seatGuest: (seatId, guestId) => {
+    get().commit((d) => { d.seatAssignments = assignSeat(d.seatAssignments, seatId, guestId); }, 'seat guest');
+  },
+
+  unseat: (guestId) => {
+    get().commit((d) => { d.seatAssignments = unseatGuest(d.seatAssignments, guestId); }, 'unseat guest');
+  },
+
+  seatGroupAt: (tableId, group) => {
+    get().commit((d) => {
+      const table = d.objects[tableId];
+      if (!table) return;
+      const seats = getSeats(table);
+      const taken = new Set(Object.keys(d.seatAssignments));
+      const seatedGuests = new Set(Object.values(d.seatAssignments));
+      const pool = d.guestOrder.filter((id) => {
+        const g = d.guests[id];
+        return g && g.group === group && g.rsvp !== 'no' && !seatedGuests.has(id);
+      });
+      for (const seat of seats) {
+        if (pool.length === 0) break;
+        if (taken.has(seat.id)) continue;
+        const next = pool.shift();
+        if (next) d.seatAssignments[seat.id] = next;
+      }
+    }, 'seat group');
   },
 }));
 
