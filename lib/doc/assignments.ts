@@ -29,6 +29,8 @@ export function assignSeat(map: SeatMap, seatId: string, guestId: string): SeatM
   if (from !== null) delete next[from];
   next[seatId] = guestId;
 
+  // Defensive: displaced !== guestId can't be false (caught by early return on line 24),
+  // but checking it makes the swap logic clearer.
   if (displaced !== undefined && displaced !== guestId) {
     if (from !== null) next[from] = displaced;
   }
