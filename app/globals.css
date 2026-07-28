@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #171b1f;
+  --color-canvas: #e8edef;
+  --color-rule: #cbd4d9;
+  --color-cool: #1e62a8;
+  --color-warm: #b8762a;
+  --color-flag: #8e3b2f;
+
+  --color-paper: #ffffff;
+  --color-subtle: #f7f9fa;
+  --color-toolbar: #f2f5f7;
+  --color-hairline: #edf1f3;
+  --color-divider: #e2e8eb;
+  --color-divider-light: #dfe6e9;
+  --color-panel-border: #d5dee2;
+  --color-ruler-border: #c6d0d6;
+  --color-seat-stroke: #c3cdd3;
+  --color-object-stroke: #b7c3ca;
+  --color-text-disabled: #b3bdc3;
+  --color-text-muted: #8a959c;
+  --color-text-secondary: #5b676f;
+  --color-text-body: #3d4950;
+  --color-wall: #2b343a;
+
+  --color-cool-deep: #17497c;
+  --color-cool-light: #9cc4e8;
+  --color-cool-tint: #e4eff9;
+  --color-cool-ruler: #dce9f5;
+  --color-cool-wash: #f2f7fc;
+
+  --color-warm-seat: #ebd7b4;
+  --color-warm-card: #f9f2e7;
+  --color-warm-text: #8a6120;
+  --color-warm-deep: #5c3d10;
+
+  --color-flag-border: #e0c4be;
+
+  --font-ui: var(--font-archivo), 'Helvetica Neue', Helvetica, sans-serif;
+  --font-name: var(--font-newsreader), Georgia, serif;
+  --font-data: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-none: 0;
+}
+
+/* Drafting chrome: square corners everywhere except circles. */
+:where(button, input, select, textarea, [role='button']) {
+  border-radius: 0;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  border-color: var(--color-cool);
+  box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
+}
+
+/* The only animation in the product: a guest settling into a seat. */
+@keyframes settle {
+  0%   { transform: scale(1.18); }
+  60%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
