@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tickLadder } from '@/lib/geometry/ticks';
+import { tickLadder, MIN_MINOR_PX } from '@/lib/geometry/ticks';
 
 describe('tickLadder', () => {
   it('uses 1 m minor / 5 m major at working zoom', () => {
@@ -17,9 +17,15 @@ describe('tickLadder', () => {
     expect(near.minor).toBeLessThanOrEqual(25);
   });
 
-  it('always keeps minor ticks at least 6 screen px apart', () => {
+  it('picks the smallest step that still clears the minimum spacing', () => {
+    const STEPS = [5, 10, 25, 50, 100, 200, 500, 1000, 2000, 5000];
     for (const scale of [0.05, 0.1, 0.25, 0.38, 0.5, 1, 2, 4, 6]) {
-      expect(tickLadder(scale).minor * scale).toBeGreaterThanOrEqual(6);
+      const { minor } = tickLadder(scale);
+      expect(minor * scale).toBeGreaterThanOrEqual(MIN_MINOR_PX);
+      const previous = STEPS[STEPS.indexOf(minor) - 1];
+      if (previous !== undefined) {
+        expect(previous * scale).toBeLessThan(MIN_MINOR_PX);
+      }
     }
   });
 

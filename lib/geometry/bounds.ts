@@ -20,8 +20,12 @@ export function localExtents(obj: SceneObject): { hw: Cm; hh: Cm } {
     }
     case 'headTable':
     case 'sweetheart': {
+      // Seated on one edge only, but an AABB cannot pad asymmetrically without
+      // also shifting its centre. Pad both sides fully: over-covering the empty
+      // edge is harmless, under-covering the seated edge leaves chairs outside
+      // the box and lets a neighbour snap flush into them.
       const pad = SEAT_OFFSET + SEAT_RADIUS;
-      return { hw: obj.width / 2, hh: obj.height / 2 + pad / 2 };
+      return { hw: obj.width / 2, hh: obj.height / 2 + pad };
     }
     case 'label':
       // A label has no box; approximate from the font size so it can still be selected and snapped.
