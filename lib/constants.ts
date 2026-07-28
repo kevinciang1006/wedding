@@ -22,3 +22,13 @@ export const ZOOM_KEY_STEP = 1.2;   // multiplicative scale factor per +/- keypr
 export const SEAT_INITIALS_ABOVE = 0.6;
 export const SEAT_NAMES_ABOVE = 1.0;
 export const CM_PER_FOOT = 30.48;
+
+// Object rendering (Task 9).
+export const NAME_FONT_SIZE = 13;         // Newsreader "13 on canvas": table label, seat initials, seat name
+export const DATA_FONT_SIZE = 9;          // IBM Plex Mono — table fill count
+export const PROP_LABEL_FONT_SIZE = 10;   // IBM Plex Mono — prop label
+export const DIETARY_DOT_RADIUS = 2;      // cm
+export const SEAT_NAME_GAP = 10;          // cm beyond SEAT_RADIUS where the outside name label sits
+export const SEAT_NAME_LABEL_WIDTH = 220; // cm, generous centring box for the outside name label
+export const SETTLE_MS = 320;
+export const OUTSIDE_ROOM_OPACITY = 0.45;

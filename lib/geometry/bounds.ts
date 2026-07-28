@@ -53,3 +53,13 @@ export function getBoundsAt(obj: SceneObject, x: Cm, y: Cm): Aabb {
 export function getBounds(obj: SceneObject): Aabb {
   return getBoundsAt(obj, obj.x, obj.y);
 }
+
+/**
+ * An object counts as "outside the room" the moment any part of its AABB
+ * spills past the room rectangle — not only once it's fully clear of it.
+ * That matches `outsideRoom`'s role as a warning count: a table half off
+ * the edge still needs the planner's attention.
+ */
+export function isOutsideRoom(bounds: Aabb, room: { width: Cm; height: Cm }): boolean {
+  return bounds.left < 0 || bounds.top < 0 || bounds.right > room.width || bounds.bottom > room.height;
+}

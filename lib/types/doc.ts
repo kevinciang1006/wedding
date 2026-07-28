@@ -32,6 +32,11 @@ export function hasBox(obj: SceneObject): obj is RectTable | Sweetheart | HeadTa
   return obj.type !== 'roundTable' && obj.type !== 'label';
 }
 
+export function isProp(obj: SceneObject): obj is PropRect {
+  return obj.type === 'danceFloor' || obj.type === 'stage' || obj.type === 'bar'
+    || obj.type === 'buffet' || obj.type === 'rect';
+}
+
 export type Rsvp = 'yes' | 'no' | 'pending';
 
 export interface Guest {

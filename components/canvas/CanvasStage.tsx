@@ -2,6 +2,7 @@
 
 import { Layer, Stage } from 'react-konva';
 import { StaticLayer } from '@/components/canvas/StaticLayer';
+import { ObjectsLayer } from '@/components/canvas/ObjectsLayer';
 import type { Viewport } from '@/components/canvas/useViewport';
 
 interface CanvasStageProps {
@@ -10,9 +11,9 @@ interface CanvasStageProps {
 
 /**
  * One `Stage`, three `Layer`s back to front: Static (room + grid, cached),
- * Objects (Task 9) and Overlay (Task 10) — both empty placeholders here.
- * Separate layers so panning or redrawing one never forces a repaint of
- * the others.
+ * Objects (tables/props/labels/seats) and Overlay (Task 10) — the last an
+ * empty placeholder here. Separate layers so panning or redrawing one never
+ * forces a repaint of the others.
  *
  * Zoom/pan live entirely on the Stage's own `scaleX`/`scaleY`/`x`/`y`; every
  * child is drawn in room centimetres (1 cm = 1 Konva unit), never pre
@@ -42,7 +43,7 @@ export function CanvasStage({ viewport }: CanvasStageProps) {
         onDragEnd={handleDragEnd}
       >
         <StaticLayer />
-        <Layer />
+        <ObjectsLayer />
         <Layer />
       </Stage>
     </div>
