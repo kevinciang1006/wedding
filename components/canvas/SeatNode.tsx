@@ -120,7 +120,27 @@ export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
         <Circle radius={SEAT_RADIUS + 3} stroke={SEAT_DROP_RING} strokeWidth={4} strokeScaleEnabled={false} />
       )}
       <Circle radius={SEAT_RADIUS} fill={fill} stroke={stroke} strokeWidth={strokeWidth} dash={dash} strokeScaleEnabled={false} />
-      {guest !== null && guest.dietary !== null && <Circle radius={dotRadius} fill={FLAG} />}
+      {guest !== null && guest.dietary !== null && (
+        <Circle
+          // Offset to the seat's upper-right edge rather than the centre: initials
+          // and the settle scale both originate from the centre, and a centred dot
+          // is unreliably covered by the initials text at exactly the zoom range
+          // (>SEAT_INITIALS_ABOVE) where both are visible. A fixed local offset
+          // stays screen-consistent regardless of the table's own rotation — this
+          // Group carries the seat's position but never its rotation (only the
+          // outside-name Text below applies `seat.angle`, to itself, not here).
+          // The white ring (reusing ROOM_FILL, this token set's one white) is what
+          // keeps the marker legible against both the seat fill and the initials,
+          // same idiom as the mobile viewer's own dietary marker.
+          x={SEAT_RADIUS * 0.707}
+          y={-SEAT_RADIUS * 0.707}
+          radius={dotRadius}
+          fill={FLAG}
+          stroke={ROOM_FILL}
+          strokeWidth={1.5}
+          strokeScaleEnabled={false}
+        />
+      )}
       {guest !== null && scale > SEAT_INITIALS_ABOVE && (
         <Text
           text={initialsOf(guest.name)}
