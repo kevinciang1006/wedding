@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Circle, Group, Rect, Text } from 'react-konva';
 import { useShallow } from 'zustand/react/shallow';
 import { useDocStore } from '@/stores/docStore';
@@ -26,9 +26,11 @@ function fillCountColor(seated: number, total: number): string {
 
 /**
  * One table: a plate (Circle for round, Rect for the rest), its label and
- * seated-count, and its seats. `getSeats(obj)` runs exactly once per render,
- * here — SeatNode only ever receives an already-resolved `Seat`, so mounting
- * N seats never recomputes the whole ring N times.
+ * seated-count, and its seats. `getSeats(obj)` is memoised on `obj` here —
+ * SeatNode only ever receives an already-resolved `Seat`, so mounting N
+ * seats never recomputes the whole ring N times, and re-rendering this
+ * component for a reason unrelated to `obj` (a fill-count change, a
+ * selection toggle) doesn't hand every seat a fresh object either.
  *
  * The plate/label and the seats are two independent Konva `Group`s rather
  * than one nested pair: `getSeats` already returns seat positions in
@@ -48,10 +50,18 @@ export const TableNode = memo(function TableNode({ id }: TableNodeProps) {
   // object on every call and plain Object.is would never consider two calls
   // equal.
   const { seated, total } = useDocStore(useShallow((s) => tableFill(s, id)));
+  // `obj` is referentially stable from the narrow docStore selector — Immer
+  // shares untouched branches across a commit that doesn't touch this
+  // object — so this only recomputes on a real shape/position change, not
+  // on every render this component happens to do for an unrelated reason
+  // (`selected` toggling, this table's own fill count changing). Without
+  // it, `getSeats` would hand every `SeatNode` a fresh `Seat` object on
+  // those renders too, and `React.memo`'s shallow prop comparison would
+  // treat that as a change, defeating seat-level isolation.
+  const seats = useMemo(() => (obj ? getSeats(obj) : []), [obj]);
 
   if (!obj || !isTable(obj)) return null;
 
-  const seats = getSeats(obj);
   const opacity = isOutsideRoom(getBounds(obj), room) ? OUTSIDE_ROOM_OPACITY : 1;
   const stroke = selected ? COOL : OBJECT_STROKE;
   const plateWidth = obj.type === 'roundTable' ? obj.diameter : obj.width;

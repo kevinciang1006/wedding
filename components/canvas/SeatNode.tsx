@@ -11,7 +11,7 @@ import {
   SEAT_OCCUPIED_FILL, WARM, INK, canvasNameFont,
 } from '@/lib/canvasTokens';
 import {
-  DIETARY_DOT_RADIUS, NAME_FONT_SIZE, SEAT_INITIALS_ABOVE, SEAT_NAMES_ABOVE,
+  DIETARY_DOT_SCREEN_PX, NAME_FONT_SIZE, SEAT_INITIALS_ABOVE, SEAT_NAMES_ABOVE,
   SEAT_NAME_GAP, SEAT_NAME_LABEL_WIDTH, SEAT_RADIUS, SETTLE_MS,
 } from '@/lib/constants';
 
@@ -36,16 +36,25 @@ function initialsOf(name: string): string {
 
 /**
  * One seat, positioned by its already-resolved `Seat` (world cm, produced
- * once per table by `getSeats` in TableNode — never recomputed here, so
- * mounting N seats never re-derives the whole ring N times).
+ * by TableNode's single, `useMemo`-cached `getSeats` call — never
+ * recomputed here). That memoisation is load-bearing for this component's
+ * own isolation, not just TableNode's own re-render count: `getSeats`
+ * builds a fresh array on every call, so without memoising it on the
+ * table's `obj`, any table-level re-render for a reason unrelated to seat
+ * geometry (this table's own fill count changing, `selected` toggling)
+ * would hand every seat here a brand-new `Seat` object, and `React.memo`'s
+ * shallow prop comparison would treat that as a change — defeating
+ * isolation for every seat at this table, table-level counters wouldn't
+ * even show it.
  *
- * Three independent, narrow store slices, each keyed to this one seat, so a
- * change to any *other* seat's occupant — or any unrelated object entirely
- * — never re-renders this one: `seatAssignments[seat.id]`, the assigned
- * guest's own record, and the two `viewStore` seat-transient flags scoped
- * to `seat.id`. `scale` is the one deliberately broad subscription: every
- * seat has to react to the D6 zoom ladder, and that isolation guarantee is
- * about "moving one table," not about zooming the whole canvas.
+ * Given a stable `seat` prop, three independent, narrow store slices, each
+ * keyed to this one seat, so a change to any *other* seat's occupant — or
+ * any unrelated object entirely — never re-renders this one:
+ * `seatAssignments[seat.id]`, the assigned guest's own record, and the two
+ * `viewStore` seat-transient flags scoped to `seat.id`. `scale` is the one
+ * deliberately broad subscription: every seat has to react to the D6 zoom
+ * ladder, and that isolation guarantee is about "moving one table" (or
+ * "seating one guest"), not about zooming the whole canvas.
  */
 export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
   const guestId = useDocStore((s) => s.seatAssignments[seat.id] ?? null);
@@ -101,6 +110,9 @@ export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
 
   const { fill, stroke, strokeWidth, dash } = seatPaint(isHovered, guest !== null);
   const angleRad = (seat.angle * Math.PI) / 180;
+  // The design's 4px dot is a screen measure, so divide out the stage scale.
+  // Cap at a quarter of the seat so it cannot swamp the seat when zoomed far out.
+  const dotRadius = Math.min(SEAT_RADIUS * 0.25, DIETARY_DOT_SCREEN_PX / scale);
 
   return (
     <Group ref={groupRef} x={seat.x} y={seat.y}>
@@ -108,7 +120,7 @@ export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
         <Circle radius={SEAT_RADIUS + 3} stroke={SEAT_DROP_RING} strokeWidth={4} strokeScaleEnabled={false} />
       )}
       <Circle radius={SEAT_RADIUS} fill={fill} stroke={stroke} strokeWidth={strokeWidth} dash={dash} strokeScaleEnabled={false} />
-      {guest !== null && guest.dietary !== null && <Circle radius={DIETARY_DOT_RADIUS} fill={FLAG} />}
+      {guest !== null && guest.dietary !== null && <Circle radius={dotRadius} fill={FLAG} />}
       {guest !== null && scale > SEAT_INITIALS_ABOVE && (
         <Text
           text={initialsOf(guest.name)}

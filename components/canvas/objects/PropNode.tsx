@@ -53,11 +53,19 @@ export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
   const obj = useDocStore((s) => s.objects[id]);
   const room = useDocStore((s) => s.room);
   const hatchRef = useRef<Konva.Shape | null>(null);
+  // Narrowing on `obj.type === 'danceFloor'` here (rather than inside the
+  // effect) pulls plain-number width/height out of the SceneObject union
+  // eagerly, so the effect's own deps are those two numbers, not the whole
+  // `obj`. Task 10 adds dragging, which commits `obj` on every pointer-move;
+  // depending on the whole object would re-rasterise this cached hatch on
+  // every drag frame instead of only on an actual resize.
+  const danceFloorWidth = obj && obj.type === 'danceFloor' ? obj.width : undefined;
+  const danceFloorHeight = obj && obj.type === 'danceFloor' ? obj.height : undefined;
 
   useEffect(() => {
-    if (!obj || obj.type !== 'danceFloor') return;
-    hatchRef.current?.cache({ x: 0, y: 0, width: obj.width, height: obj.height });
-  }, [obj]);
+    if (danceFloorWidth === undefined || danceFloorHeight === undefined) return;
+    hatchRef.current?.cache({ x: 0, y: 0, width: danceFloorWidth, height: danceFloorHeight });
+  }, [danceFloorWidth, danceFloorHeight]);
 
   if (!obj || !isProp(obj)) return null;
 
