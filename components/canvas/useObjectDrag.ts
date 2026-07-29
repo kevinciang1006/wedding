@@ -77,18 +77,25 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
   const onDragStart = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
     const stage = e.target.getStage();
     if (!stage) return;
-    // Space-held means this gesture is a pan, not an object drag, even
-    // though Konva already armed one on this node (its own internal
-    // mousedown.konva listener races the Stage's startDrag() independently
-    // of React props — see CanvasStage.tsx for the middle-click half of this
-    // same issue). getState(), not a subscription: this hook is called once
-    // per object node, and a subscription here would re-render every node on
-    // every space press. Stopping the drag and leaving dragRef untouched
-    // means onDragEnd finds nothing to commit.
-    if (useViewStore.getState().spaceHeld) {
-      e.target.stopDrag();
-      return;
-    }
+    // Space-held means this gesture should be a pan, not an object drag. That
+    // is normally already guaranteed upstream: useViewportKeyboard empties
+    // Konva.dragButtons while space is held, so this node's own internal
+    // mousedown.konva listener never arms a drag on it in the first place,
+    // and onDragStart is never even called for a space+drag gesture. This
+    // branch is a safety net, not the mechanism, and it deliberately does
+    // NOT call e.target.stopDrag() here (an earlier version did): Konva's
+    // stopDrag() is not scoped to the node it's called on — DD._endDragBefore/
+    // _endDragAfter (konva/lib/DragAndDrop.js) walk every entry in the one
+    // shared DD._dragElements map and force-stop any 'dragging' entry, not
+    // just this node's own — so calling it here would also collaterally kill
+    // the Stage's own concurrent pan drag, which is exactly the bug this
+    // arming-suppression approach replaced. Leaving dragRef untouched is
+    // enough on its own: onDragEnd finds nothing to commit. getState(), not a
+    // subscription: this hook is called once per object node, and a
+    // subscription here would re-render every node on every space press.
+    // Kept as a guard (rather than deleted) so a future change to the arming
+    // logic can't silently reintroduce a spurious 'move' history entry.
+    if (useViewStore.getState().spaceHeld) return;
     const { selectedIds } = useViewStore.getState();
     const ids = selectedIds.includes(id) ? selectedIds : [id];
     dragRef.current = ids
