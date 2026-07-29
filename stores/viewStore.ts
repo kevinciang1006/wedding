@@ -12,6 +12,12 @@ interface ViewState {
   tool: ObjectType | null;
   gridVisible: boolean;
   gridSnap: boolean;
+  // Whether Space is currently held, mirrored from useViewport's own
+  // isSpaceHeldRef so useObjectDrag's onDragStart (a getState() read, not a
+  // subscription — object nodes stay memo'd on narrow selectors and must not
+  // re-render on every space press) can tell a space+left-drag apart from a
+  // plain object drag.
+  spaceHeld: boolean;
   guides: Guide[];
   marquee: { x: number; y: number; width: number; height: number } | null;
   dragDistance: { from: { x: number; y: number }; to: { x: number; y: number }; cm: number } | null;
@@ -30,6 +36,7 @@ interface ViewActions {
   addToSelection: (id: string) => void;
   clearSelection: () => void;
   setTool: (tool: ObjectType | null) => void;
+  setSpaceHeld: (held: boolean) => void;
   toggleGrid: () => void;
   toggleGridSnap: () => void;
   setGuides: (guides: Guide[]) => void;
@@ -61,6 +68,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   tool: null,
   gridVisible: true,
   gridSnap: true,
+  spaceHeld: false,
   guides: [],
   marquee: null,
   dragDistance: null,
@@ -75,6 +83,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   )),
   clearSelection: () => set({ selectedIds: [] }),
   setTool: (tool) => set({ tool }),
+  setSpaceHeld: (held) => set({ spaceHeld: held }),
   toggleGrid: () => set((s) => ({ gridVisible: !s.gridVisible })),
   toggleGridSnap: () => set((s) => ({ gridSnap: !s.gridSnap })),
   setGuides: (guides) => set({ guides }),

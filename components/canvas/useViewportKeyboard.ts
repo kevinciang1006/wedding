@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
 import type Konva from 'konva';
+import { useViewStore } from '@/stores/viewStore';
 import { ZOOM_KEY_STEP } from '@/lib/constants';
 import type { CursorStyle } from '@/components/canvas/useViewport';
 
@@ -44,6 +45,14 @@ interface UseViewportKeyboardArgs {
  * `useViewport`'s mouse handlers to arm space+drag panning). Every branch
  * bails when focus is in an editable element so typing a guest name never
  * nudges the canvas.
+ *
+ * Space-held state is written to two places on every keydown/keyup: the
+ * pre-existing `isSpaceHeldRef` (read synchronously by `useViewport`'s
+ * `handleMouseDown`, mid-gesture, before a render could ever catch up) and
+ * `viewStore.spaceHeld` (read via `getState()`, not subscribed, by
+ * `useObjectDrag`'s `onDragStart` — a subscription there would re-render
+ * every object node on every space press, defeating their `React.memo`).
+ * Both are updated from the same two handlers so they can never drift.
  */
 export function useViewportKeyboard({
   stageRef, containerRef, isSpaceHeldRef, fitToRoom, resetZoom, zoomBy, setCursor,
@@ -56,6 +65,7 @@ export function useViewportKeyboard({
         if (!e.repeat) {
           e.preventDefault();
           isSpaceHeldRef.current = true;
+          useViewStore.getState().setSpaceHeld(true);
           if (!stageRef.current?.isDragging()) setCursor('grab');
         }
         return;
@@ -86,6 +96,7 @@ export function useViewportKeyboard({
     function handleKeyUp(e: KeyboardEvent): void {
       if (e.code !== 'Space') return;
       isSpaceHeldRef.current = false;
+      useViewStore.getState().setSpaceHeld(false);
       if (!stageRef.current?.isDragging()) setCursor('default');
     }
 

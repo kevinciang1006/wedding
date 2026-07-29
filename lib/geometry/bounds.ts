@@ -63,3 +63,16 @@ export function getBounds(obj: SceneObject): Aabb {
 export function isOutsideRoom(bounds: Aabb, room: { width: Cm; height: Cm }): boolean {
   return bounds.left < 0 || bounds.top < 0 || bounds.right > room.width || bounds.bottom > room.height;
 }
+
+/** The single AABB spanning every box in `boxes` — used for the multi-selection combined bounding box. */
+export function unionBounds(boxes: Aabb[]): Aabb {
+  const left = Math.min(...boxes.map((b) => b.left));
+  const right = Math.max(...boxes.map((b) => b.right));
+  const top = Math.min(...boxes.map((b) => b.top));
+  const bottom = Math.max(...boxes.map((b) => b.bottom));
+  return {
+    left, right, top, bottom,
+    cx: (left + right) / 2, cy: (top + bottom) / 2,
+    width: right - left, height: bottom - top,
+  };
+}

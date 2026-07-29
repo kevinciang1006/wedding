@@ -1,11 +1,22 @@
 'use client';
 
 import { Stage } from 'react-konva';
-import type Konva from 'konva';
+import Konva from 'konva';
 import { StaticLayer } from '@/components/canvas/StaticLayer';
 import { ObjectsLayer } from '@/components/canvas/ObjectsLayer';
 import { OverlayLayer } from '@/components/canvas/OverlayLayer';
 import type { Viewport } from '@/components/canvas/useViewport';
+
+// Konva arms a drag on every draggable node for any button in this global
+// list (Node.js's own internal mousedown.konva listener), independently of
+// our own onMouseDown/onDragStart handlers and unrestrained by
+// preventDefault(). Its default, [0, 1], means a middle-click on top of a
+// table/prop/label both pans the Stage (an explicit startDrag() call below)
+// AND arms that object's own drag from the same pointer stream. Narrowing
+// this once, module-wide, to left-button-only removes the object side of
+// that without touching the Stage's own pan, which never went through this
+// mechanism in the first place.
+Konva.dragButtons = [0];
 
 interface CanvasStageProps {
   viewport: Viewport;

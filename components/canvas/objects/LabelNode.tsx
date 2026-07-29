@@ -3,9 +3,10 @@
 import { memo } from 'react';
 import { Text } from 'react-konva';
 import { useDocStore } from '@/stores/docStore';
+import { useViewStore } from '@/stores/viewStore';
 import { useObjectDrag } from '@/components/canvas/useObjectDrag';
 import { getBounds, isOutsideRoom, localExtents } from '@/lib/geometry/bounds';
-import { INK, canvasNameFont } from '@/lib/canvasTokens';
+import { COOL, INK, canvasNameFont } from '@/lib/canvasTokens';
 import { OUTSIDE_ROOM_OPACITY } from '@/lib/constants';
 
 interface LabelNodeProps { id: string }
@@ -23,10 +24,16 @@ interface LabelNodeProps { id: string }
  * resize handling (`SelectionTransformer`'s `transformEnd`) folds
  * `scaleY` into a new `fontSize` instead, and resets scale to 1 here after,
  * same convention as Table/PropNode.
+ *
+ * Selected treatment: a label has no stroke to recolour the way
+ * Table/PropNode's plate does, so the fill itself swaps to the same `COOL`
+ * accent instead — narrow `useViewStore` subscription, same pattern those
+ * two use, so this only re-renders on this label's own selection toggle.
  */
 export const LabelNode = memo(function LabelNode({ id }: LabelNodeProps) {
   const obj = useDocStore((s) => s.objects[id]);
   const room = useDocStore((s) => s.room);
+  const selected = useViewStore((s) => s.selectedIds.includes(id));
   const drag = useObjectDrag(id);
 
   if (!obj || obj.type !== 'label') return null;
@@ -46,7 +53,7 @@ export const LabelNode = memo(function LabelNode({ id }: LabelNodeProps) {
       text={obj.label}
       fontFamily={canvasNameFont()}
       fontSize={obj.fontSize}
-      fill={INK}
+      fill={selected ? COOL : INK}
       width={hw * 2}
       height={hh * 2}
       offsetX={hw}

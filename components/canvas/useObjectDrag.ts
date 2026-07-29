@@ -77,6 +77,18 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
   const onDragStart = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
     const stage = e.target.getStage();
     if (!stage) return;
+    // Space-held means this gesture is a pan, not an object drag, even
+    // though Konva already armed one on this node (its own internal
+    // mousedown.konva listener races the Stage's startDrag() independently
+    // of React props — see CanvasStage.tsx for the middle-click half of this
+    // same issue). getState(), not a subscription: this hook is called once
+    // per object node, and a subscription here would re-render every node on
+    // every space press. Stopping the drag and leaving dragRef untouched
+    // means onDragEnd finds nothing to commit.
+    if (useViewStore.getState().spaceHeld) {
+      e.target.stopDrag();
+      return;
+    }
     const { selectedIds } = useViewStore.getState();
     const ids = selectedIds.includes(id) ? selectedIds : [id];
     dragRef.current = ids

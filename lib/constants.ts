@@ -43,5 +43,4 @@ export const TRANSFORMER_BORDER_PX = 1;
 export const TRANSFORMER_BORDER_DASH_PX: [number, number] = [4, 4];
 export const ROTATE_HANDLE_PX = 10;
 export const ROTATE_HANDLE_OFFSET_PX = 32;
-export const ROTATE_HANDLE_STEM_PX = 1;
 export const GUIDE_MARKER_PX = 13;

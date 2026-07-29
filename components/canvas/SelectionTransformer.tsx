@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import type Konva from 'konva';
-import { Transformer } from 'react-konva';
+import { Rect, Transformer } from 'react-konva';
 import { useShallow } from 'zustand/react/shallow';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
 import { isProp, isTable, type SceneObject } from '@/lib/types/doc';
-import { COOL, ROOM_FILL } from '@/lib/canvasTokens';
+import { getBounds, unionBounds } from '@/lib/geometry/bounds';
+import { COOL, ROOM_FILL, SELECTION_WASH } from '@/lib/canvasTokens';
 import {
   ROTATE_HANDLE_OFFSET_PX, ROTATE_HANDLE_PX, ROTATION_SNAP,
   TRANSFORMER_ANCHOR_PX, TRANSFORMER_ANCHOR_STROKE_PX, TRANSFORMER_BORDER_DASH_PX, TRANSFORMER_BORDER_PX,
@@ -52,17 +53,24 @@ function isNode(value: Konva.Node | undefined): value is Konva.Node {
  * confirmed by instrumenting `commit` during a multi-select drag before this
  * guard existed. A multi-selection can still be dragged as one group — that
  * is entirely `useObjectDrag`'s own doing, independent of the Transformer —
- * it just doesn't get its own combined-box resize/rotate handles.
+ * it just doesn't get its own combined-box resize/rotate handles. Instead,
+ * when 2+ objects are selected this renders a plain, non-interactive `Rect`
+ * over the union of their bounds (below) — a real border and extent, just
+ * without handles, which honestly signals group-resize isn't available
+ * rather than showing nothing at all.
  *
- * Two further disclosed simplifications against the token spec, both because Konva's
- * `Transformer` has no supported hook for them without externally
- * replicating its internal (rotated) box geometry, which risks a visibly
- * *misaligned* decoration — worse than the plainer, always-correct default:
- * the dashed bounding box has no `rgba(30,98,168,0.05)` fill wash (Konva
- * exposes `borderStroke`/`borderDash` but no backing fill for the `.back`
- * shape), and the rotate handle's connecting stem (Konva's own
- * `rotateLineVisible`, on by default) shares the border's dash pattern
- * rather than being a distinct solid 1px line.
+ * One disclosed simplification against the token spec, because Konva's
+ * `Transformer` has no supported hook for it without externally replicating
+ * its internal (rotated) box geometry, which risks a visibly *misaligned*
+ * decoration — worse than the plainer, always-correct default: the rotate
+ * handle's connecting stem (Konva's own `rotateLineVisible`, on by default)
+ * shares the border's dash pattern rather than being a distinct solid 1px
+ * line, since both are drawn by one continuous path in `_createBack`'s
+ * `sceneFunc`. The bounding box's own fill wash, by contrast, DOES have a
+ * working hook — `.back` exposes a plain `fill()` setter that `update()`
+ * never touches — set once in the attach effect below; confirmed empirically
+ * (resize, rotate, and deselect/reselect) that it survives every Transformer
+ * update cycle rather than being clobbered.
  */
 export function SelectionTransformer() {
   const transformerRef = useRef<Konva.Transformer | null>(null);
@@ -78,6 +86,14 @@ export function SelectionTransformer() {
     selectedIds.map((id) => s.objects[id]).filter((o): o is SceneObject => o !== undefined)
   )));
   const anyTable = selectedObjects.some(isTable);
+  // The Transformer itself is only ever attached to a single node (see the
+  // doc comment below), which leaves 2+ selected objects with no resize/
+  // rotate handles and, before this fix, no visual affordance at all — not
+  // even a border. This is the fallback for that case: a plain, listening
+  // -disabled Rect over the union of every selected object's own AABB, drawn
+  // whenever there's more than one. It deliberately carries no handles: the
+  // absence is honest feedback that group-resize isn't available, not a bug.
+  const multiBounds = selectedObjects.length > 1 ? unionBounds(selectedObjects.map(getBounds)) : null;
 
   useEffect(() => {
     const tr = transformerRef.current;
@@ -88,6 +104,12 @@ export function SelectionTransformer() {
       ? selectedIds.map((id) => stage.findOne(`#${id}`)).filter(isNode)
       : [];
     tr.nodes(nodes);
+    // Transformer.update() (called by nodes()) sets stroke/dash/geometry on
+    // `.back` every cycle but never touches fill — set once here, after
+    // nodes(), and it survives resize/rotate/re-attach. Confirmed
+    // empirically in a real browser (see Task 10's fix report); if this ever
+    // stops surviving after a Konva upgrade, delete rather than fight it.
+    tr.findOne<Konva.Shape>('.back')?.fill(SELECTION_WASH);
     tr.getLayer()?.batchDraw();
   }, [selectedIds]);
 
@@ -131,32 +153,48 @@ export function SelectionTransformer() {
   }, []);
 
   return (
-    <Transformer
-      ref={transformerRef}
-      visible={selectedIds.length === 1}
-      rotateEnabled
-      resizeEnabled={!anyTable}
-      enabledAnchors={anyTable ? [] : RESIZE_ANCHORS}
-      anchorSize={TRANSFORMER_ANCHOR_PX / scale}
-      anchorCornerRadius={0}
-      anchorFill={ROOM_FILL}
-      anchorStroke={COOL}
-      anchorStrokeWidth={TRANSFORMER_ANCHOR_STROKE_PX / scale}
-      borderStroke={COOL}
-      borderStrokeWidth={TRANSFORMER_BORDER_PX / scale}
-      borderDash={TRANSFORMER_BORDER_DASH_PX.map((d) => d / scale)}
-      rotateAnchorOffset={ROTATE_HANDLE_OFFSET_PX / scale}
-      anchorStyleFunc={(anchor) => {
-        if (!anchor.hasName('rotater')) return;
-        const size = ROTATE_HANDLE_PX / scale;
-        anchor.width(size);
-        anchor.height(size);
-        anchor.offsetX(size / 2);
-        anchor.offsetY(size / 2);
-        anchor.cornerRadius(size / 2); // a square Rect with radius = half its size renders as a circle
-      }}
-      onTransform={handleTransform}
-      onTransformEnd={handleTransformEnd}
-    />
+    <>
+      {multiBounds && (
+        <Rect
+          x={multiBounds.left}
+          y={multiBounds.top}
+          width={multiBounds.width}
+          height={multiBounds.height}
+          fill={SELECTION_WASH}
+          stroke={COOL}
+          strokeWidth={1}
+          dash={[4, 4]}
+          strokeScaleEnabled={false}
+          listening={false}
+        />
+      )}
+      <Transformer
+        ref={transformerRef}
+        visible={selectedIds.length === 1}
+        rotateEnabled
+        resizeEnabled={!anyTable}
+        enabledAnchors={anyTable ? [] : RESIZE_ANCHORS}
+        anchorSize={TRANSFORMER_ANCHOR_PX / scale}
+        anchorCornerRadius={0}
+        anchorFill={ROOM_FILL}
+        anchorStroke={COOL}
+        anchorStrokeWidth={TRANSFORMER_ANCHOR_STROKE_PX / scale}
+        borderStroke={COOL}
+        borderStrokeWidth={TRANSFORMER_BORDER_PX / scale}
+        borderDash={TRANSFORMER_BORDER_DASH_PX.map((d) => d / scale)}
+        rotateAnchorOffset={ROTATE_HANDLE_OFFSET_PX / scale}
+        anchorStyleFunc={(anchor) => {
+          if (!anchor.hasName('rotater')) return;
+          const size = ROTATE_HANDLE_PX / scale;
+          anchor.width(size);
+          anchor.height(size);
+          anchor.offsetX(size / 2);
+          anchor.offsetY(size / 2);
+          anchor.cornerRadius(size / 2); // a square Rect with radius = half its size renders as a circle
+        }}
+        onTransform={handleTransform}
+        onTransformEnd={handleTransformEnd}
+      />
+    </>
   );
 }
