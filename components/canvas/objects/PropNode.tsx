@@ -4,9 +4,11 @@ import { memo, useEffect, useRef } from 'react';
 import type Konva from 'konva';
 import { Group, Rect, Shape, Text } from 'react-konva';
 import { useDocStore } from '@/stores/docStore';
+import { useViewStore } from '@/stores/viewStore';
+import { useObjectDrag } from '@/components/canvas/useObjectDrag';
 import { getBounds, isOutsideRoom } from '@/lib/geometry/bounds';
 import { isProp } from '@/lib/types/doc';
-import { HATCH_BAND, OBJECT_STROKE, PROP_FILL, ROOM_FILL, TEXT_SECONDARY, canvasDataFont } from '@/lib/canvasTokens';
+import { COOL, HATCH_BAND, OBJECT_STROKE, PROP_FILL, ROOM_FILL, TEXT_SECONDARY, canvasDataFont } from '@/lib/canvasTokens';
 import { OUTSIDE_ROOM_OPACITY, PROP_LABEL_FONT_SIZE } from '@/lib/constants';
 
 interface PropNodeProps { id: string }
@@ -48,10 +50,22 @@ function drawHatch(ctx: Konva.Context, width: number, height: number): void {
  * fresh cache, a plain move doesn't), but it only touches this one dance
  * floor's own effect, not the cross-object re-render this task's isolation
  * rule is actually about.
+ *
+ * The Group is this object's one interactive Konva node — `id={obj.id}`,
+ * `draggable`, and `useObjectDrag(id)`'s handlers, same wiring `TableNode`
+ * uses, so `SelectionTransformer` and a multi-select drag can find this
+ * node by id regardless of object kind. Plate stroke turns `COOL` when
+ * selected, matching `TableNode`'s own plate treatment. `scaleX`/`scaleY`
+ * pinned at 1: props get real resize via the Transformer, which converts
+ * its scale into new width/height and resets the node's scale back to 1 on
+ * `transformEnd` — these props exist so that reset is never fighting a
+ * leftover non-1 value passed down from here on the next render.
  */
 export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
   const obj = useDocStore((s) => s.objects[id]);
   const room = useDocStore((s) => s.room);
+  const selected = useViewStore((s) => s.selectedIds.includes(id));
+  const drag = useObjectDrag(id);
   const hatchRef = useRef<Konva.Shape | null>(null);
   // Narrowing on `obj.type === 'danceFloor'` here (rather than inside the
   // effect) pulls plain-number width/height out of the SceneObject union
@@ -71,9 +85,25 @@ export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
 
   const opacity = isOutsideRoom(getBounds(obj), room) ? OUTSIDE_ROOM_OPACITY : 1;
   const labelH = PROP_LABEL_FONT_SIZE * 1.3;
+  const stroke = selected ? COOL : OBJECT_STROKE;
 
   return (
-    <Group x={obj.x} y={obj.y} rotation={obj.rotation} opacity={opacity}>
+    <Group
+      id={obj.id}
+      x={obj.x}
+      y={obj.y}
+      rotation={obj.rotation}
+      scaleX={1}
+      scaleY={1}
+      opacity={opacity}
+      draggable={drag.draggable}
+      onMouseDown={drag.onMouseDown}
+      onClick={drag.onClick}
+      onContextMenu={drag.onContextMenu}
+      onDragStart={drag.onDragStart}
+      onDragMove={drag.onDragMove}
+      onDragEnd={drag.onDragEnd}
+    >
       {obj.type === 'danceFloor' ? (
         <>
           <Shape
@@ -89,7 +119,7 @@ export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
             y={-obj.height / 2}
             width={obj.width}
             height={obj.height}
-            stroke={OBJECT_STROKE}
+            stroke={stroke}
             strokeWidth={1.5}
             dash={[4, 4]}
             strokeScaleEnabled={false}
@@ -102,7 +132,7 @@ export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
           width={obj.width}
           height={obj.height}
           fill={obj.type === 'rect' ? undefined : PROP_FILL}
-          stroke={OBJECT_STROKE}
+          stroke={stroke}
           strokeWidth={1.5}
           strokeScaleEnabled={false}
         />

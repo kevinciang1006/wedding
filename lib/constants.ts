@@ -32,3 +32,16 @@ export const SEAT_NAME_GAP = 10;          // cm beyond SEAT_RADIUS where the out
 export const SEAT_NAME_LABEL_WIDTH = 220; // cm, generous centring box for the outside name label
 export const SETTLE_MS = 320;
 export const OUTSIDE_ROOM_OPACITY = 0.45;
+
+// Selection and manipulation (Task 10). All *_PX constants are screen
+// measures — divided by the current stage scale before use, same rule as
+// SNAP_PX/DIETARY_DOT_SCREEN_PX above, since 1 Konva unit = 1 room cm here,
+// not 1 screen px.
+export const TRANSFORMER_ANCHOR_PX = 8;
+export const TRANSFORMER_ANCHOR_STROKE_PX = 1.5;
+export const TRANSFORMER_BORDER_PX = 1;
+export const TRANSFORMER_BORDER_DASH_PX: [number, number] = [4, 4];
+export const ROTATE_HANDLE_PX = 10;
+export const ROTATE_HANDLE_OFFSET_PX = 32;
+export const ROTATE_HANDLE_STEM_PX = 1;
+export const GUIDE_MARKER_PX = 13;

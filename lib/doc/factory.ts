@@ -28,3 +28,15 @@ export function createObject(type: ObjectType, at: { x: Cm; y: Cm }, z = 0): Sce
     case 'label':       return { ...base, type, fontSize: 40 };
   }
 }
+
+/**
+ * A copy of `obj` offset by `dx`/`dy`, with a fresh id from the same counter
+ * `createObject` uses — so a duplicated object can never collide with one
+ * placed fresh from the (future) object palette. Unlike `createObject`,
+ * this keeps every one of the source object's own fields (its actual
+ * width/height/rotation/label/seat count), because "duplicate" means "copy
+ * what's here," not "place another default-shaped object of the same type."
+ */
+export function duplicateObject(obj: SceneObject, dx: Cm, dy: Cm): SceneObject {
+  return { ...obj, id: nextId(obj.type), x: obj.x + dx, y: obj.y + dy };
+}

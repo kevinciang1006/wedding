@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
 import { SeatNode } from '@/components/canvas/SeatNode';
+import { useObjectDrag } from '@/components/canvas/useObjectDrag';
 import { getSeats } from '@/lib/geometry/seats';
 import { getBounds, isOutsideRoom } from '@/lib/geometry/bounds';
 import { tableFill } from '@/lib/doc/derive';
@@ -39,11 +40,22 @@ function fillCountColor(seated: number, total: number): string {
  * double-apply that transform. Only the plate/label content — drawn here in
  * the table's own local space, centred on 0,0 — gets that Group's
  * transform; the seat Group carries opacity only.
+ *
+ * The plate `Group` is the one Konva node this object is, for selection,
+ * drag, and the Transformer: `id={obj.id}` is how `useObjectDrag` finds a
+ * co-selected sibling's node during a multi-drag and how
+ * `SelectionTransformer` finds nodes to attach to; `draggable` plus
+ * `useObjectDrag(id)`'s handlers make it click/shift-click-selectable and
+ * snap-drag-able. Tables never get resize anchors (rotate only —
+ * `SelectionTransformer`'s own call), so `scaleX`/`scaleY` here are pinned
+ * at 1 defensively rather than because a table transform is ever expected
+ * to leave them at anything else.
  */
 export const TableNode = memo(function TableNode({ id }: TableNodeProps) {
   const obj = useDocStore((s) => s.objects[id]);
   const room = useDocStore((s) => s.room);
   const selected = useViewStore((s) => s.selectedIds.includes(id));
+  const drag = useObjectDrag(id);
   // useShallow bails the re-render unless *this* table's own seated/total
   // pair actually changed — without it, seating a guest anywhere in the doc
   // would re-render every mounted table, since tableFill() returns a fresh
@@ -74,7 +86,22 @@ export const TableNode = memo(function TableNode({ id }: TableNodeProps) {
 
   return (
     <>
-      <Group x={obj.x} y={obj.y} rotation={obj.rotation} opacity={opacity}>
+      <Group
+        id={obj.id}
+        x={obj.x}
+        y={obj.y}
+        rotation={obj.rotation}
+        scaleX={1}
+        scaleY={1}
+        opacity={opacity}
+        draggable={drag.draggable}
+        onMouseDown={drag.onMouseDown}
+        onClick={drag.onClick}
+        onContextMenu={drag.onContextMenu}
+        onDragStart={drag.onDragStart}
+        onDragMove={drag.onDragMove}
+        onDragEnd={drag.onDragEnd}
+      >
         {obj.type === 'roundTable' ? (
           <Circle radius={obj.diameter / 2} fill={ROOM_FILL} stroke={stroke} strokeWidth={1.5} strokeScaleEnabled={false} />
         ) : (
@@ -120,7 +147,10 @@ export const TableNode = memo(function TableNode({ id }: TableNodeProps) {
           wrap="none"
         />
       </Group>
-      <Group opacity={opacity}>
+      {/* listening={false}: seats are purely visual until Task 14 makes them
+          real drop targets — without this they'd otherwise swallow clicks
+          that should reach the Stage's empty-canvas marquee check instead. */}
+      <Group opacity={opacity} listening={false}>
         {seats.map((seat) => <SeatNode key={seat.id} seat={seat} />)}
       </Group>
     </>

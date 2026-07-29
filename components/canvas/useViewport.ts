@@ -9,6 +9,7 @@ import { FIT_PADDING, MAX_SCALE, MIN_SCALE } from '@/lib/constants';
 import { useElementSize } from '@/components/canvas/useElementSize';
 import { useViewportKeyboard } from '@/components/canvas/useViewportKeyboard';
 import { useGesturePinch } from '@/components/canvas/useGesturePinch';
+import { useMarquee } from '@/components/canvas/useMarquee';
 
 // How much a single wheel "notch" (deltaY ~100) changes scale under
 // Ctrl/Cmd+wheel or trackpad-pinch-as-wheel. Exponential so repeated small
@@ -60,12 +61,13 @@ function centeredView(
 
 /**
  * Viewport transform maths and Konva pointer/drag wiring, composed with the
- * three concerns that live in their own hooks: `useElementSize` (container
+ * four concerns that live in their own hooks: `useElementSize` (container
  * measurement), `useViewportKeyboard` (window shortcuts + space-held
- * tracking) and `useGesturePinch` (Safari pinch). Kept split so Task 10
- * (which extends `handleMouseDown`'s plain-left-drag branch) and Task 11
- * (which needs this pointer/scale plumbing for the rulers) aren't both
- * editing one large file.
+ * tracking), `useGesturePinch` (Safari pinch) and `useMarquee`
+ * (`handleMouseDown`'s plain-left-drag branch, Task 10's marquee-select).
+ * Kept split so this stays editable alongside Task 11 (which needs this same
+ * pointer/scale plumbing for the rulers) without both landing in one large
+ * file.
  */
 export function useViewport(): Viewport {
   const room = useDocStore((s) => s.room);
@@ -140,19 +142,27 @@ export function useViewport(): Viewport {
     setView({ x: stage.x() - e.evt.deltaX, y: stage.y() - e.evt.deltaY });
   }, [zoomToPointer, setView]);
 
-  // Space+left-drag or a middle-button drag pans; a plain left-drag does
-  // nothing here (Task 10 gives it marquee-select / object-drag meaning).
-  // `stage.startDrag()` begins a Konva drag session without the Stage ever
-  // being `draggable` — which matters because Konva's own `draggable`
-  // would accept a plain left-drag too (its default `dragButtons` is
-  // `[0, 1]`), and that's exactly the case this must NOT pan on.
+  const { startMarquee } = useMarquee({ stageRef });
+
+  // Space+left-drag or a middle-button drag pans. A plain left-drag on an
+  // object never reaches here in a way that matters — Konva's own event
+  // bubbling still fires this after the object's own mousedown handler, but
+  // `startMarquee` no-ops unless the hit target is the Stage itself (empty
+  // canvas), so it's harmless to always try it. `stage.startDrag()` begins a
+  // Konva drag session without the Stage ever being `draggable` — which
+  // matters because Konva's own `draggable` would accept a plain left-drag
+  // too (its default `dragButtons` is `[0, 1]`), and that's exactly the case
+  // this must NOT pan on.
   const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
     const isMiddleButton = e.evt.button === 1;
     const isSpaceLeftDrag = e.evt.button === 0 && isSpaceHeldRef.current;
-    if (!isMiddleButton && !isSpaceLeftDrag) return;
-    e.evt.preventDefault();
-    stageRef.current?.startDrag(e);
-  }, []);
+    if (isMiddleButton || isSpaceLeftDrag) {
+      e.evt.preventDefault();
+      stageRef.current?.startDrag(e);
+      return;
+    }
+    if (e.evt.button === 0) startMarquee(e);
+  }, [startMarquee]);
 
   const handleDragStart = useCallback(() => setCursor('grabbing'), []);
 

@@ -17,6 +17,11 @@ interface ViewState {
   dragDistance: { from: { x: number; y: number }; to: { x: number; y: number }; cm: number } | null;
   hoveredSeatId: string | null;
   justSeatedSeatId: string | null;
+  // Right-click menu: screen (client) coordinates to position the HTML
+  // panel at, plus which object it targets. Screen, not room cm, because
+  // the menu itself is plain HTML rendered as a sibling of the Konva
+  // Stage, not a Konva node.
+  contextMenu: { x: number; y: number; targetId: string } | null;
 }
 
 interface ViewActions {
@@ -32,6 +37,8 @@ interface ViewActions {
   setDragDistance: (dragDistance: ViewState['dragDistance']) => void;
   setHoveredSeat: (id: string | null) => void;
   setJustSeated: (id: string | null) => void;
+  openContextMenu: (menu: NonNullable<ViewState['contextMenu']>) => void;
+  closeContextMenu: () => void;
 }
 
 export type ViewStoreState = ViewState & ViewActions;
@@ -59,6 +66,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   dragDistance: null,
   hoveredSeatId: null,
   justSeatedSeatId: null,
+  contextMenu: null,
 
   setView: (view) => set(view),
   select: (ids) => set({ selectedIds: ids }),
@@ -74,4 +82,6 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   setDragDistance: (dragDistance) => set({ dragDistance }),
   setHoveredSeat: (id) => set({ hoveredSeatId: id }),
   setJustSeated: (id) => set({ justSeatedSeatId: id }),
+  openContextMenu: (menu) => set({ contextMenu: menu }),
+  closeContextMenu: () => set({ contextMenu: null }),
 }));

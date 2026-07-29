@@ -26,6 +26,12 @@ export const FLAG = '#8E3B2F'; // dietary marker only
 export const PROP_FILL = '#F2F5F7';
 export const HATCH_BAND = '#F6F8F9'; // dance floor's darker hatch band; the lighter band reuses ROOM_FILL
 
+// --- Selection and manipulation (Task 10) -------------------------------
+// Marquee fill and the Transformer's bounding-box fill are the exact same
+// value in the token spec, so one constant covers both rather than two
+// components each inlining the same rgba string.
+export const SELECTION_WASH = 'rgba(30, 98, 168, 0.05)';
+
 let cachedNameFont: string | null = null;
 let cachedDataFont: string | null = null;
 

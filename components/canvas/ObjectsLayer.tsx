@@ -61,10 +61,11 @@ export function ObjectsLayer() {
   }, []);
 
   return (
-    // listening={false}: nothing drawn by this task responds to pointer
-    // events yet (Task 10 adds selection/drag, Task 14 adds seat drop
-    // targets) — same reasoning as StaticLayer's room and grid.
-    <Layer ref={layerRef} listening={false}>
+    // Listening (the Konva default) — Task 10 makes every table/prop/label
+    // a click/drag/right-click target, via each node's own `useObjectDrag`.
+    // Seats stay opted out individually within TableNode; Task 14 owns
+    // making them real drop targets.
+    <Layer ref={layerRef}>
       {objectOrder.map((id) => <ObjectNode key={id} id={id} />)}
     </Layer>
   );

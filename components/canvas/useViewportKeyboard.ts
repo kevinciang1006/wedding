@@ -6,7 +6,10 @@ import type Konva from 'konva';
 import { ZOOM_KEY_STEP } from '@/lib/constants';
 import type { CursorStyle } from '@/components/canvas/useViewport';
 
-function isEditableTarget(el: Element | null): boolean {
+// Shared with useKeyboard.ts (Task 10) — the one guard every window-level
+// shortcut in this app bails on, so a guest name typed into a future input
+// never doubles as a nudge/duplicate/delete/undo command.
+export function isEditableTarget(el: Element | null): boolean {
   if (!(el instanceof HTMLElement)) return false;
   return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable;
 }

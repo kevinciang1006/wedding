@@ -42,6 +42,11 @@
   --font-data: var(--font-plex-mono), ui-monospace, monospace;
 
   --radius-none: 0;
+
+  /* Floating-panel shadow (design source: "screen" — context menu, and any
+     later dropdown/toast that isn't the bottom-left readout HUD, which gets
+     its own, tighter "readout" shadow instead). */
+  --shadow-screen: 0 4px 28px rgba(20, 32, 40, 0.12);
 }
 
 /* Drafting chrome: square corners everywhere except circles. */
