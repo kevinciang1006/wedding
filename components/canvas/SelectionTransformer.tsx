@@ -94,6 +94,22 @@ export function SelectionTransformer() {
   // whenever there's more than one. It deliberately carries no handles: the
   // absence is honest feedback that group-resize isn't available, not a bug.
   const multiBounds = selectedObjects.length > 1 ? unionBounds(selectedObjects.map(getBounds)) : null;
+  // `multiBounds` is derived from docStore, which this project's central
+  // performance rule (see useObjectDrag.ts's onDragMove) deliberately never
+  // writes to mid-drag — only .position() on the Konva nodes themselves, plus
+  // viewStore.guides/dragDistance. Left alone, this box would sit still for
+  // the whole gesture and only jump into place when dragEnd's commit lands —
+  // exactly the interaction it exists to support. Every co-selected node
+  // moves by the grabbed node's own delta (dragDistance.to - .from), so
+  // offsetting the box by that same delta keeps it on the objects for the
+  // whole drag. onDragEnd clears dragDistance to null in the same
+  // synchronous batch as the commit that updates docStore (setDragDistance
+  // runs before commit, both inside one Konva handler, both flushed as one
+  // React update), so this offset and the box's own post-commit position
+  // never both apply at once — no double-offset flash on release.
+  const drag = useViewStore((s) => s.dragDistance);
+  const dragDx = drag ? drag.to.x - drag.from.x : 0;
+  const dragDy = drag ? drag.to.y - drag.from.y : 0;
 
   useEffect(() => {
     const tr = transformerRef.current;
@@ -156,8 +172,8 @@ export function SelectionTransformer() {
     <>
       {multiBounds && (
         <Rect
-          x={multiBounds.left}
-          y={multiBounds.top}
+          x={multiBounds.left + dragDx}
+          y={multiBounds.top + dragDy}
           width={multiBounds.width}
           height={multiBounds.height}
           fill={SELECTION_WASH}

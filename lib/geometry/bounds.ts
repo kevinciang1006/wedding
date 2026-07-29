@@ -64,8 +64,17 @@ export function isOutsideRoom(bounds: Aabb, room: { width: Cm; height: Cm }): bo
   return bounds.left < 0 || bounds.top < 0 || bounds.right > room.width || bounds.bottom > room.height;
 }
 
-/** The single AABB spanning every box in `boxes` — used for the multi-selection combined bounding box. */
-export function unionBounds(boxes: Aabb[]): Aabb {
+/**
+ * The single AABB spanning every box in `boxes` — used for the multi-selection
+ * combined bounding box. `null` for an empty input: `Math.min`/`Math.max` over
+ * an empty spread yield `Infinity`/`-Infinity` (and a `NaN` centre), which is
+ * not a box. Not reachable today — the one caller only invokes this when
+ * `selectedObjects.length > 1` — but this is a tested foundation module other
+ * tasks may call directly, so it stays total rather than trusting every future
+ * caller to pre-guard.
+ */
+export function unionBounds(boxes: Aabb[]): Aabb | null {
+  if (boxes.length === 0) return null;
   const left = Math.min(...boxes.map((b) => b.left));
   const right = Math.max(...boxes.map((b) => b.right));
   const top = Math.min(...boxes.map((b) => b.top));

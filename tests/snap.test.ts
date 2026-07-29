@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getBounds, getBoundsAt } from '@/lib/geometry/bounds';
+import { getBounds, getBoundsAt, unionBounds } from '@/lib/geometry/bounds';
 import { snapPosition } from '@/lib/geometry/snap';
 import type { SceneObject } from '@/lib/types/doc';
 
@@ -61,6 +61,19 @@ describe('bounds cover the seat ring', () => {
     };
     expect(getBounds(rectTable).top).toBeLessThanOrEqual(-100);
     expect(getBounds(rectTable).bottom).toBeGreaterThanOrEqual(100);
+  });
+});
+
+describe('unionBounds', () => {
+  it('returns null for an empty list rather than Infinity/NaN', () => {
+    expect(unionBounds([])).toBeNull();
+  });
+
+  it('spans the union of every box', () => {
+    const a = getBounds(bar('a', 100, 50));   // left:0 right:200 top:0 bottom:100
+    const b = getBounds(bar('b', 400, 250));  // left:300 right:500 top:200 bottom:300
+    const u = unionBounds([a, b]);
+    expect(u).toMatchObject({ left: 0, right: 500, top: 0, bottom: 300, cx: 250, cy: 150 });
   });
 });
 
