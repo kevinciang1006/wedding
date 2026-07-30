@@ -36,6 +36,7 @@ export const es: Record<keyof typeof en, string> = {
   dragDuplicateHint: 'arrastra para duplicar',
 
   objectLabel: 'Etiqueta',
+  rotation: 'Rotación',
   diameter: 'Diámetro',
   seats: 'Asientos',
   width: 'Ancho',

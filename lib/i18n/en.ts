@@ -30,10 +30,15 @@ export const en = {
   rectangle: 'Rectangle',
   dragDuplicateHint: 'drag to duplicate',
 
-  // Inspector field captions. X/Y/rotation are bare letters in the UI
-  // itself (same convention as the readout's W/H/R/X/Y), so only the
-  // spelled-out captions below need an entry here.
+  // Inspector field captions. X/Y stay bare letters in the UI itself (same
+  // convention as the readout's W/H/R/X/Y) and need no dictionary entry —
+  // "X"/"Y" are near-universal shorthand, readable as both the visible
+  // label and the accessible name. Rotation keeps "R" as its visible label
+  // for the same density reason, but a bare "R" is not universal shorthand
+  // the way X/Y are, so its *accessible* name is this spelled-out word
+  // instead — visible density and accessible clarity are allowed to differ.
   objectLabel: 'Label',
+  rotation: 'Rotation',
   diameter: 'Diameter',
   seats: 'Seats',
   width: 'Width',

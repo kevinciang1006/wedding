@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 
 interface UseCommitFieldResult {
@@ -35,10 +35,24 @@ interface UseCommitFieldResult {
  * previous value in state, call `setState` inline if it moved) rather than
  * in a `useEffect`, so a prop change and the field snapping to it land in
  * the same commit instead of a visible extra frame of stale text.
+ *
+ * Escape's revert needs a guard, not just a `setText` call: `.blur()` fires
+ * `focusout` synchronously, and React delivers that to `onBlur` before
+ * `onKeyDown` returns — while `onBlur` is still closed over THIS render's
+ * `text`, since `setText` only queues the update rather than rewriting the
+ * closure in place. Without the guard, `onBlur` reads the pre-revert text,
+ * and if it happens to parse (the common case — the user typed a plausible
+ * value, then thought better of it) it commits the very edit Escape was
+ * supposed to cancel. `revertingRef` flags that the blur about to fire is
+ * Escape's own, so `onBlur` can skip straight past `commit` instead of
+ * re-deriving "was this a revert" from `text`/`canonical` (both of which can
+ * legitimately be equal for other reasons, e.g. tabbing through without
+ * typing anything).
  */
 export function useCommitField(canonical: string, commit: (text: string) => boolean): UseCommitFieldResult {
   const [text, setText] = useState(canonical);
   const [prevCanonical, setPrevCanonical] = useState(canonical);
+  const revertingRef = useRef(false);
 
   if (canonical !== prevCanonical) {
     setPrevCanonical(canonical);
@@ -46,6 +60,10 @@ export function useCommitField(canonical: string, commit: (text: string) => bool
   }
 
   function onBlur(): void {
+    if (revertingRef.current) {
+      revertingRef.current = false;
+      return;
+    }
     if (!commit(text)) setText(canonical);
   }
 
@@ -53,6 +71,7 @@ export function useCommitField(canonical: string, commit: (text: string) => bool
     if (e.key === 'Enter') {
       e.currentTarget.blur();
     } else if (e.key === 'Escape') {
+      revertingRef.current = true;
       setText(canonical);
       e.currentTarget.blur();
     }

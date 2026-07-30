@@ -87,6 +87,7 @@ function IntField({ labelText, value, onCommit }: IntFieldProps) {
 }
 
 function RotationField({ value, onCommit }: { value: number; onCommit: (deg: number) => void }) {
+  const t = useT();
   const normalized = ((value % 360) + 360) % 360;
   const field = useCommitField(String(Math.round(normalized)), (text) => {
     const n = Number(text);
@@ -100,7 +101,11 @@ function RotationField({ value, onCommit }: { value: number; onCommit: (deg: num
         <input
           type="text"
           inputMode="numeric"
-          aria-label="R"
+          // Visible label stays the bare "R" (matches the readout's W/H/R/X/Y
+          // density convention), but a bare letter is not universal shorthand
+          // for screen-reader users the way "X"/"Y" are — the accessible name
+          // is the spelled-out, translated word instead.
+          aria-label={t('rotation')}
           value={field.text}
           onChange={field.onChange}
           onBlur={field.onBlur}

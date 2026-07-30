@@ -22,7 +22,9 @@ describe('viewportCentreCm', () => {
   });
 
   it('follows pan and zoom the same way a fitted room would', () => {
+    // Centre pixel (500, 400) minus pan (100, 50), divided by scale 0.5:
+    // (400, 350) / 0.5 = (800, 700).
     const v = { width: 1000, height: 800, scale: 0.5, x: 100, y: 50 };
-    expect(viewportCentreCm(v)).toEqual({ x: (500 - 100) / 0.5, y: (400 - 50) / 0.5 });
+    expect(viewportCentreCm(v)).toEqual({ x: 800, y: 700 });
   });
 });
