@@ -141,7 +141,23 @@ export const en = {
   csvImportCount: 'Import {count} guests',
   csvRowError: 'Row {row}: {reason}',
   csvNoName: 'no name in the name column',
+  csvBadRsvp: 'unrecognised RSVP value, set to pending',
+  csvRowEmpty: 'row is empty',
   csvEmpty: 'That file has no rows. Check it exported with a header row.',
+  csvChooseFile: 'Choose a CSV file',
+  csvChooseAnother: 'Choose a different file',
+  csvPreviewHeading: 'Preview',
+  csvErrorsHeading: 'Rows to fix',
+  csvColumnHeading: 'Column',
+  csvMapsTo: 'Maps to',
+
+  cancelAction: 'Cancel',
+
+  noGroup: 'No group',
+  allGroups: 'All groups',
+  rsvpYes: 'Yes',
+  rsvpNo: 'No',
+  rsvpPending: 'Pending',
 
   outsideRoom: '{count} outside the room',
   tableFullWarning: '{table} has {free} seats left and {unseated} guests are unseated. Add a table or raise the seat count.',

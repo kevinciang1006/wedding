@@ -33,6 +33,7 @@ interface DocActions {
   seatGuest: (seatId: string, guestId: string) => void;
   unseat: (guestId: string) => void;
   seatGroupAt: (tableId: string, group: string) => void;
+  seatAllRemaining: () => void;
   canUndo: boolean;
   canRedo: boolean;
   undoLabel: string | null;
@@ -145,6 +146,36 @@ export const useDocStore = create<DocState>((set, get) => ({
         if (next) d.seatAssignments[seat.id] = next;
       }
     }, 'seat group');
+  },
+
+  // The guest panel footer's "Seat remaining" button — every currently
+  // unseated, non-declined guest (`guestOrder` order) dropped into the next
+  // free seat, walking tables in `objectOrder` and seats within a table in
+  // index order. Same shape as `seatGroupAt` above (a pool of eligible
+  // guests consumed as free seats are found) but unscoped to one table or
+  // group: this is the "just fill the room" bulk action, not the
+  // right-click menu's "seat this one group here." One `commit` — filling
+  // dozens of seats is one history entry, not one per guest.
+  seatAllRemaining: () => {
+    get().commit((d) => {
+      const taken = new Set(Object.keys(d.seatAssignments));
+      const seatedGuests = new Set(Object.values(d.seatAssignments));
+      const pool = d.guestOrder.filter((id) => {
+        const g = d.guests[id];
+        return g && g.rsvp !== 'no' && !seatedGuests.has(id);
+      });
+      for (const tableId of d.objectOrder) {
+        if (pool.length === 0) break;
+        const table = d.objects[tableId];
+        if (!table) continue;
+        for (const seat of getSeats(table)) {
+          if (pool.length === 0) break;
+          if (taken.has(seat.id)) continue;
+          const next = pool.shift();
+          if (next) { d.seatAssignments[seat.id] = next; taken.add(seat.id); }
+        }
+      }
+    }, 'seat remaining');
   },
 }));
 

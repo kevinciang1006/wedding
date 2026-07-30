@@ -136,7 +136,23 @@ export const es: Record<keyof typeof en, string> = {
   csvImportCount: 'Importar {count} invitados',
   csvRowError: 'Fila {row}: {reason}',
   csvNoName: 'sin nombre en la columna de nombre',
+  csvBadRsvp: 'valor de RSVP no reconocido, se marca como pendiente',
+  csvRowEmpty: 'la fila está vacía',
   csvEmpty: 'Ese archivo no tiene filas. Comprueba que se exportó con una fila de encabezado.',
+  csvChooseFile: 'Elige un archivo CSV',
+  csvChooseAnother: 'Elegir otro archivo',
+  csvPreviewHeading: 'Vista previa',
+  csvErrorsHeading: 'Filas por corregir',
+  csvColumnHeading: 'Columna',
+  csvMapsTo: 'Se asigna a',
+
+  cancelAction: 'Cancelar',
+
+  noGroup: 'Sin grupo',
+  allGroups: 'Todos los grupos',
+  rsvpYes: 'Sí',
+  rsvpNo: 'No',
+  rsvpPending: 'Pendiente',
 
   outsideRoom: '{count} fuera de la sala',
   tableFullWarning: '{table} tiene {free} asientos libres y {unseated} invitados sin asiento. Añade una mesa o aumenta el número de asientos.',

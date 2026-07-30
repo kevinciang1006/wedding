@@ -3,6 +3,12 @@ import type { Rsvp } from '@/lib/types/doc';
 
 interface Filter {
   unseatedOnly: boolean;
+  // Task 13's "Dietary" chip — a fourth mutually-exclusive segment alongside
+  // `unseatedOnly`/`group`, same shape as those two rather than a second,
+  // independent boolean axis: the guest panel's chip row reads as one set of
+  // radio-like options (All/Unseated/Dietary/Group), not a set of togglable
+  // checkboxes that could combine arbitrarily.
+  dietaryOnly: boolean;
   group: string | null;
   rsvp: Rsvp | null;
   query: string;
@@ -35,7 +41,7 @@ interface UiActions {
 
 export type UiStoreState = UiState & UiActions;
 
-const initialFilter: Filter = { unseatedOnly: false, group: null, rsvp: null, query: '' };
+const initialFilter: Filter = { unseatedOnly: false, dietaryOnly: false, group: null, rsvp: null, query: '' };
 
 // Chrome and interaction state — never persisted (only Doc is saved) and
 // never pushed through docStore's history: toggling a panel or typing a

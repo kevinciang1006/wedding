@@ -10,18 +10,28 @@ import { TopBar } from '@/components/chrome/TopBar';
 import { ObjectPalette } from '@/components/chrome/ObjectPalette';
 import { Toast } from '@/components/chrome/Toast';
 import { Inspector } from '@/components/inspector/Inspector';
+import { GuestPanel } from '@/components/guests/GuestPanel';
+import { useDocStore } from '@/stores/docStore';
+import { useUiStore } from '@/stores/uiStore';
 import { useViewport } from '@/components/canvas/useViewport';
 import { useKeyboard, placeObject } from '@/components/canvas/useKeyboard';
 import { screenPointToRoomCm } from '@/lib/geometry/viewport';
 import { isObjectType, PALETTE_DND_TYPE } from '@/lib/dnd';
 import { RULER_SIZE } from '@/lib/constants';
 
+// TEMP-TASK-13-SEED: manual verification hook, removed before commit.
+if (typeof window !== 'undefined') {
+  (window as unknown as { __setting: unknown }).__setting = { useDocStore, useUiStore };
+}
+
 /**
  * The client root. The 52px top bar is the first child of the outer column;
  * the 200px palette is the first child of the row; the 320px guest panel
- * (Task 13) will be the row's last child — this shell was deliberately kept
- * empty of that third slot until Task 13 actually needs it, rather than
- * reserving a blank column now.
+ * (`GuestPanel`, Task 13) is the row's last child, shown whenever
+ * `uiStore.guestPanelOpen` is true (default) — that flag predates this
+ * task (Task 7) and has no toggle control wired to it yet, but respecting
+ * it now costs nothing and means a future "hide panel" button needs no
+ * change here.
  *
  * Inside that row, the canvas viewport is its own 2x2 CSS grid: a 28x28
  * corner cell, a top ruler spanning the canvas width and a left ruler
@@ -61,6 +71,7 @@ import { RULER_SIZE } from '@/lib/constants';
 export function Editor() {
   const viewport = useViewport();
   useKeyboard(viewport);
+  const guestPanelOpen = useUiStore((s) => s.guestPanelOpen);
 
   function handleDragOver(e: DragEvent<HTMLDivElement>): void {
     if (!e.dataTransfer.types.includes(PALETTE_DND_TYPE)) return;
@@ -107,6 +118,7 @@ export function Editor() {
             <Inspector />
           </div>
         </div>
+        {guestPanelOpen && <GuestPanel />}
       </div>
       <ContextMenu />
       <Toast />
