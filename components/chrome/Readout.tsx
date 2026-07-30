@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
@@ -75,6 +76,20 @@ export function Readout() {
   const objectOrder = useDocStore((s) => s.objectOrder);
   const drag = useViewStore((s) => s.dragDistance);
   const fill = useDocStore(useShallow((s) => (obj && isTable(obj) ? tableFill(s, obj.id) : null)));
+  // Every other object's AABB, recomputed only when the doc's objects, their
+  // order, or the selection actually change — not on every render. During a
+  // drag none of those change (the drag never touches docStore, only
+  // `viewStore.dragDistance`), so this stays cheap on every drag frame even
+  // as the plan grows past the dozens of tables it's meant to hold; only the
+  // dragged object's OWN bounds (`bounds` below) still needs to recompute
+  // live, and that's a single `getBoundsAt` call, not an O(objects) scan.
+  const neighbourBounds = useMemo(() => (
+    objectOrder
+      .filter((id) => id !== selectedId)
+      .map((id) => objects[id])
+      .filter((o): o is SceneObject => o !== undefined)
+      .map(getBounds)
+  ), [objects, objectOrder, selectedId]);
 
   if (!obj) return null;
 
@@ -82,11 +97,6 @@ export function Readout() {
   const liveY = obj.y + (drag ? drag.to.y - drag.from.y : 0);
   const bounds = drag ? getBoundsAt(obj, liveX, liveY) : getBounds(obj);
 
-  const neighbourBounds = objectOrder
-    .filter((id) => id !== obj.id)
-    .map((id) => objects[id])
-    .filter((o): o is SceneObject => o !== undefined)
-    .map(getBounds);
   const clear = neighbourBounds.length > 0
     ? Math.min(...neighbourBounds.map((n) => aabbGap(bounds, n)))
     : null;

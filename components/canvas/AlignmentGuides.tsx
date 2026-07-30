@@ -37,10 +37,47 @@ function markerOf(guide: Guide): { x: number; y: number } {
  * guide's own marker so it never sits on top of it — to the side for an 'x'
  * guide (whose line runs vertically), above for a 'y' guide (whose line runs
  * horizontally), in both cases clear of the line itself rather than
- * crossing it.
+ * crossing it. Only used when at most one guide is active — see `cornerOf`
+ * below for the simultaneous-both-axes case, where anchoring each label off
+ * its own independent marker is exactly what lets them collide.
  */
 function labelAnchor(guide: Guide, marker: { x: number; y: number }, offset: number): { x: number; y: number } {
   return guide.axis === 'x' ? { x: marker.x + offset, y: marker.y } : { x: marker.x, y: marker.y - offset };
+}
+
+/**
+ * `snapPosition` (`lib/geometry/snap.ts`) runs `best()` independently per
+ * axis, so `guides` can only ever hold at most one 'x' and one 'y' entry —
+ * never two of the same axis. When both are present (the common
+ * corner-flush case: an object dragged until it lines up with a neighbour
+ * on X and Y at once), the two guides' own markers can sit close together
+ * while their label text — unit-dependent, can run past 20 characters — is
+ * far wider than that gap, so anchoring each label off its own marker (as
+ * `labelAnchor` does) lets the boxes overlap. The fix anchors both labels
+ * from the one point that actually matters here instead: `{x: xGuide.at,
+ * y: yGuide.at}`, the exact coordinate the dragged edge snapped to on both
+ * axes — the visual "corner" of the snap.
+ */
+function cornerOf(guides: Guide[]): { x: number; y: number } | null {
+  const xGuide = guides.find((g) => g.axis === 'x');
+  const yGuide = guides.find((g) => g.axis === 'y');
+  return xGuide && yGuide ? { x: xGuide.at, y: yGuide.at } : null;
+}
+
+/**
+ * Both corner labels stacked upper-right of the snap point, one full row
+ * (`rowGap` = box height + the same clearance `labelAnchor` uses elsewhere)
+ * apart — a separation that holds regardless of either label's text width,
+ * since box HEIGHT (unlike width) depends only on the shared font size, not
+ * on the formatted value. `axis === 'x'` gets the row nearer the corner so
+ * reading order roughly follows the guides' own left-to-right/top-to-bottom
+ * sense; which axis is "first" is otherwise arbitrary.
+ */
+function cornerLabelAnchor(
+  guide: Guide, corner: { x: number; y: number }, offset: number, boxH: number,
+): { x: number; y: number } {
+  const rowGap = boxH + offset;
+  return { x: corner.x + offset, y: corner.y - offset - (guide.axis === 'y' ? rowGap : 0) };
 }
 
 /**
@@ -62,6 +99,8 @@ export function AlignmentGuides() {
   const padX = MEASURE_BADGE_PAD_X_PX / scale;
   const padY = MEASURE_BADGE_PAD_Y_PX / scale;
   const offset = SNAP_LABEL_OFFSET_PX / scale;
+  const boxH = fontSize * 1.3 + padY * 2; // shared by every label: depends only on fontSize/padY, never on text
+  const corner = cornerOf(guides);
 
   return (
     <>
@@ -69,8 +108,9 @@ export function AlignmentGuides() {
         const marker = markerOf(guide);
         const text = t('snappedTo', { axis: guide.axis, value: formatLength(guide.at, units) });
         const boxW = measureMonoTextWidth(text, fontSize) + padX * 2;
-        const boxH = fontSize * 1.3 + padY * 2;
-        const anchor = labelAnchor(guide, marker, offset);
+        const anchor = corner
+          ? cornerLabelAnchor(guide, corner, offset, boxH)
+          : labelAnchor(guide, marker, offset);
         return (
           <Fragment key={`${guide.axis}-${i}`}>
             <Line

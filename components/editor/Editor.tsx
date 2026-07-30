@@ -7,6 +7,7 @@ import { Readout } from '@/components/chrome/Readout';
 import { ScaleBadge } from '@/components/chrome/ScaleBadge';
 import { useViewport } from '@/components/canvas/useViewport';
 import { useKeyboard } from '@/components/canvas/useKeyboard';
+import { RULER_SIZE } from '@/lib/constants';
 
 /**
  * The client root. The flex shell below is shaped so later tasks can add a
@@ -46,7 +47,19 @@ export function Editor() {
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
       <div className="flex flex-1 overflow-hidden">
-        <div className="grid flex-1 grid-cols-[28px_1fr] grid-rows-[28px_1fr] overflow-hidden">
+        <div
+          className="grid flex-1 overflow-hidden"
+          // Tailwind's arbitrary-value classes can't interpolate a JS constant,
+          // and `RULER_SIZE` is also what `Ruler`/`RulerCorner` themselves read
+          // (`lib/constants.ts`) — driving the grid template from the same
+          // constant, rather than restating `28px` here, is what makes a future
+          // change to `RULER_SIZE` a one-line edit instead of a hunt for every
+          // place the gutter width was typed out by hand.
+          style={{
+            gridTemplateColumns: `${RULER_SIZE}px 1fr`,
+            gridTemplateRows: `${RULER_SIZE}px 1fr`,
+          }}
+        >
           <RulerCorner />
           <Ruler orientation="top" length={viewport.width} />
           <Ruler orientation="left" length={viewport.height} />
