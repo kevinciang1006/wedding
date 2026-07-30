@@ -21,6 +21,12 @@ interface ViewState {
   guides: Guide[];
   marquee: { x: number; y: number; width: number; height: number } | null;
   dragDistance: { from: { x: number; y: number }; to: { x: number; y: number }; cm: number } | null;
+  // One rect per dragged object, in room cm, while an Option/Alt-drag is in
+  // progress — the only visible sign the modifier registered, now that the
+  // actual duplicate is no longer inserted (and thus rendered as a real
+  // object) until `dragEnd`. `null` outside an alt-drag, same convention as
+  // `marquee`/`dragDistance` above.
+  duplicateGhosts: { x: number; y: number; width: number; height: number }[] | null;
   hoveredSeatId: string | null;
   justSeatedSeatId: string | null;
   // Right-click menu: screen (client) coordinates to position the HTML
@@ -42,6 +48,7 @@ interface ViewActions {
   setGuides: (guides: Guide[]) => void;
   setMarquee: (marquee: ViewState['marquee']) => void;
   setDragDistance: (dragDistance: ViewState['dragDistance']) => void;
+  setDuplicateGhosts: (ghosts: ViewState['duplicateGhosts']) => void;
   setHoveredSeat: (id: string | null) => void;
   setJustSeated: (id: string | null) => void;
   openContextMenu: (menu: NonNullable<ViewState['contextMenu']>) => void;
@@ -72,6 +79,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   guides: [],
   marquee: null,
   dragDistance: null,
+  duplicateGhosts: null,
   hoveredSeatId: null,
   justSeatedSeatId: null,
   contextMenu: null,
@@ -89,6 +97,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   setGuides: (guides) => set({ guides }),
   setMarquee: (marquee) => set({ marquee }),
   setDragDistance: (dragDistance) => set({ dragDistance }),
+  setDuplicateGhosts: (duplicateGhosts) => set({ duplicateGhosts }),
   setHoveredSeat: (id) => set({ hoveredSeatId: id }),
   setJustSeated: (id) => set({ justSeatedSeatId: id }),
   openContextMenu: (menu) => set({ contextMenu: menu }),

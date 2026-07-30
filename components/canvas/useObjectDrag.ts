@@ -6,9 +6,19 @@ import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
 import { snapPosition } from '@/lib/geometry/snap';
 import { duplicateObject } from '@/lib/doc/factory';
+import { getBoundsAt } from '@/lib/geometry/bounds';
 import type { Cm, SceneObject } from '@/lib/types/doc';
 
 interface DragEntry { id: string; startX: Cm; startY: Cm; node: Konva.Node }
+
+// `altDuplicate` is captured once, from the modifier state at gesture
+// START (`onDragStart`'s `e.evt.altKey`) — not re-read at `dragEnd`, since
+// the key can easily have been released by the time the pointer comes up
+// and what the user committed to is whichever state was true when the
+// gesture began. One flag for the whole gesture, not per-entry: a
+// multi-select alt-drag either duplicates every dragged object or none of
+// them, there is no per-object mixed case.
+interface DragState { entries: DragEntry[]; altDuplicate: boolean }
 
 interface ObjectInteractionHandlers {
   draggable: boolean;
@@ -51,7 +61,7 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
   // grabbed one plus any co-selected siblings), read back at dragEnd. A
   // ref, not state: written and read entirely inside Konva event handlers,
   // never something a render needs to reflect.
-  const dragRef = useRef<DragEntry[] | null>(null);
+  const dragRef = useRef<DragState | null>(null);
 
   const onMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
     const { selectedIds, select, addToSelection } = useViewStore.getState();
@@ -100,38 +110,46 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
     const { selectedIds } = useViewStore.getState();
     const ids = selectedIds.includes(id) ? selectedIds : [id];
 
-    // Option/Alt-drag duplicates in place: every object about to move gets
-    // a same-position twin committed once, right here at gesture start —
-    // not per frame, so this doesn't collide with "never write to docStore
-    // during a drag" below. The dragged nodes keep their own ids and
-    // untouched starting positions; only new sibling objects are added, so
-    // the dragRef bookkeeping right after this is unaffected. The visible
-    // result matches the standard convention (drag away, a copy is left
-    // behind) without needing to redirect Konva's already-armed drag onto a
-    // not-yet-mounted node — the object under the pointer stays the one
-    // Konva is already dragging, and the copy is the one that stays put.
-    if (e.evt.altKey) {
-      useDocStore.getState().commit((d) => {
-        for (const oid of ids) {
-          const obj = d.objects[oid];
-          if (!obj) continue;
-          const copy = duplicateObject(obj, 0, 0);
-          d.objects[copy.id] = copy;
-          d.objectOrder.push(copy.id);
-        }
-      }, 'duplicate');
-    }
-
-    dragRef.current = ids
+    const entries: DragEntry[] = ids
       .map((oid) => {
         const node = oid === id ? e.target : stage.findOne(`#${oid}`);
         return node ? { id: oid, startX: node.x(), startY: node.y(), node } : undefined;
       })
       .filter(isDefined);
+
+    // Option/Alt-drag duplicates in place. The intent is captured here, at
+    // gesture start, from the modifier state at THIS instant — not
+    // re-checked at dragEnd, where the key may already be up — but nothing
+    // is written to docStore yet: inserting the copy now (an earlier
+    // version did exactly that) makes it a SEPARATE history entry from the
+    // 'move' dragEnd already commits for the dragged original, so one
+    // alt-drag gesture became two undos and left a confusing intermediate
+    // state (copy exactly on top of the un-moved original) after the
+    // first. The actual insert is deferred to onDragEnd below, folded into
+    // that same single commit. What happens here instead is purely visual:
+    // a dashed, unfilled ghost rect per dragged object, at its start
+    // position, published to `viewStore.duplicateGhosts` and drawn by
+    // `DuplicateGhosts.tsx` on the Overlay layer — so the modifier still
+    // gives immediate feedback despite writing nothing to the document yet.
+    const altDuplicate = e.evt.altKey;
+    if (altDuplicate && entries.length > 0) {
+      const objects = useDocStore.getState().objects;
+      const ghosts = entries
+        .map((entry) => {
+          const obj = objects[entry.id];
+          if (!obj) return undefined;
+          const bounds = getBoundsAt(obj, entry.startX, entry.startY);
+          return { x: bounds.left, y: bounds.top, width: bounds.width, height: bounds.height };
+        })
+        .filter(isDefined);
+      useViewStore.getState().setDuplicateGhosts(ghosts);
+    }
+
+    dragRef.current = { entries, altDuplicate };
   }, [id]);
 
   const onDragMove = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
-    const entries = dragRef.current;
+    const entries = dragRef.current?.entries;
     if (!entries) return;
     const grabbed = entries.find((entry) => entry.id === id);
     const moving = useDocStore.getState().objects[id];
@@ -184,21 +202,42 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
   }, [id]);
 
   const onDragEnd = useCallback(() => {
-    const entries = dragRef.current;
+    const state = dragRef.current;
     dragRef.current = null;
     useViewStore.getState().setGuides([]);
     useViewStore.getState().setDragDistance(null);
-    if (!entries || entries.length === 0) return;
-    // One commit for every moved node — a multi-select drag is still a
-    // single history entry, exactly like a single-object drag.
+    useViewStore.getState().setDuplicateGhosts(null);
+    if (!state || state.entries.length === 0) return;
+    const { entries, altDuplicate } = state;
+    // One commit for the whole gesture — a multi-select drag is still a
+    // single history entry, exactly like a single-object drag, and an
+    // alt-drag is no different: inserting the duplicate here, in the same
+    // recipe as the move, rather than as its own separate commit back in
+    // onDragStart, is what makes "drag away, a copy is left behind" ONE
+    // undo instead of two. Two passes over `entries`, not one, and in this
+    // order: every duplicate is inserted (reading each original's `x`/`y`
+    // while it's still untouched, i.e. still the drag-start position) BEFORE
+    // any original is moved — folding both into a single loop would risk a
+    // future edit reordering the two statements inside it and silently
+    // having the copy pick up the moved-to position instead of the
+    // start position it's supposed to preserve.
     useDocStore.getState().commit((d) => {
+      if (altDuplicate) {
+        for (const entry of entries) {
+          const obj = d.objects[entry.id];
+          if (!obj) continue;
+          const copy = duplicateObject(obj, 0, 0);
+          d.objects[copy.id] = copy;
+          d.objectOrder.push(copy.id);
+        }
+      }
       for (const entry of entries) {
         const obj = d.objects[entry.id];
         if (!obj) continue;
         obj.x = entry.node.x();
         obj.y = entry.node.y();
       }
-    }, 'move');
+    }, altDuplicate ? 'duplicate' : 'move');
   }, []);
 
   return { draggable: true, onMouseDown, onClick, onContextMenu, onDragStart, onDragMove, onDragEnd };
