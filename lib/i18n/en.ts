@@ -4,6 +4,17 @@ export const en = {
   noRoomSet: 'no room set',
   savedAgo: 'saved {time}',
 
+  noDateSet: 'no date set',
+  undo: 'Undo',
+  redo: 'Redo',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  roomWidth: 'Room width',
+  roomHeight: 'Room height',
+  exportComingSoon: 'Export lands in a later step',
+  language: 'Language',
+  units: 'Units',
+
   room: 'room',
   place: 'Place',
   roomSection: 'Room',
@@ -17,6 +28,18 @@ export const en = {
   buffet: 'Buffet',
   textLabel: 'Text label',
   rectangle: 'Rectangle',
+  dragDuplicateHint: 'drag to duplicate',
+
+  // Inspector field captions. X/Y/rotation are bare letters in the UI
+  // itself (same convention as the readout's W/H/R/X/Y), so only the
+  // spelled-out captions below need an entry here.
+  objectLabel: 'Label',
+  diameter: 'Diameter',
+  seats: 'Seats',
+  width: 'Width',
+  height: 'Height',
+  seatsPerSide: 'Seats/side',
+  fontSize: 'Font size',
 
   // Short shape words for the readout's header summary ("round · 10 seats ·
   // 10 seated") — distinct from the palette's full names above, which

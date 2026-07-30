@@ -1,19 +1,27 @@
 'use client';
 
+import type { DragEvent } from 'react';
 import { CanvasStage } from '@/components/canvas/CanvasStage';
 import { ContextMenu } from '@/components/canvas/ContextMenu';
 import { Ruler, RulerCorner } from '@/components/canvas/Ruler';
 import { Readout } from '@/components/chrome/Readout';
 import { ScaleBadge } from '@/components/chrome/ScaleBadge';
+import { TopBar } from '@/components/chrome/TopBar';
+import { ObjectPalette } from '@/components/chrome/ObjectPalette';
+import { Toast } from '@/components/chrome/Toast';
+import { Inspector } from '@/components/inspector/Inspector';
 import { useViewport } from '@/components/canvas/useViewport';
-import { useKeyboard } from '@/components/canvas/useKeyboard';
+import { useKeyboard, placeObject } from '@/components/canvas/useKeyboard';
+import { screenPointToRoomCm } from '@/lib/geometry/viewport';
+import { isObjectType, PALETTE_DND_TYPE } from '@/lib/dnd';
 import { RULER_SIZE } from '@/lib/constants';
 
 /**
- * The client root. The flex shell below is shaped so later tasks can add a
- * 52 px top bar as the first child of the outer column, a 200 px left
- * palette as the first child of the row, and a 320 px right guest panel as
- * its last child — all without restructuring this component.
+ * The client root. The 52px top bar is the first child of the outer column;
+ * the 200px palette is the first child of the row; the 320px guest panel
+ * (Task 13) will be the row's last child — this shell was deliberately kept
+ * empty of that third slot until Task 13 actually needs it, rather than
+ * reserving a blank column now.
  *
  * Inside that row, the canvas viewport is its own 2x2 CSS grid: a 28x28
  * corner cell, a top ruler spanning the canvas width and a left ruler
@@ -22,31 +30,60 @@ import { RULER_SIZE } from '@/lib/constants';
  * remaining cell. `Ruler`'s `length` prop is `viewport.width`/
  * `viewport.height` — the exact pixel size `useElementSize` measures off
  * that same bottom-right cell — so a ruler tick and the room coordinate it
- * names line up pixel-for-pixel with the canvas beneath it. `Readout` and
- * `ScaleBadge` are absolutely positioned inside that bottom-right cell too
+ * names line up pixel-for-pixel with the canvas beneath it. `Readout`
+ * (bottom-left), `ScaleBadge` (bottom-right) and `Inspector` (top-right,
+ * Task 12) are all absolutely positioned inside that bottom-right cell too
  * (not the outer page), so they float over the canvas viewport only, clear
- * of the ruler gutters.
+ * of the ruler gutters and of each other.
  *
  * `useViewport` is called exactly once, here, because its `fitToRoom` /
  * `resetZoom` / `zoomBy` close over the Konva stage and container refs:
- * calling the hook a second place (e.g. inside a future top bar) would
- * create a second, never-attached set of refs. Everything that needs the
- * viewport — the canvas and rulers now, chrome later — receives this one
- * instance.
+ * calling the hook a second place (e.g. inside `TopBar`) would create a
+ * second, never-attached set of refs. Everything that needs the viewport —
+ * the canvas and rulers, and now `TopBar`'s zoom stepper and
+ * `ObjectPalette`'s click-to-place — receives this one instance as a prop.
  *
- * `useKeyboard` (selection/object shortcuts) is called here too, rather
+ * `useKeyboard` (selection/object shortcuts, plus Task 12's `T`
+ * new-table-at-viewport-centre and `Cmd/Ctrl+E`) is called here too, rather
  * than composed inside `useViewport`, because unlike `useMarquee` it needs
  * neither the Stage nor the container ref — it only ever reads store state
- * via `getState()`. `ContextMenu` is plain HTML, a sibling of the canvas
- * rather than something inside the Konva `Stage`.
+ * via `getState()`, plus `viewport` itself (mirrored into a ref inside the
+ * hook — see its own header comment) for the `T` shortcut's centre point.
+ * `ContextMenu` and `Toast` are plain HTML, siblings of the canvas rather
+ * than anything inside the Konva `Stage`.
+ *
+ * `onDragOver`/`onDrop` on the canvas viewport cell back the object
+ * palette's drag-to-place: a native HTML5 drag carries `PALETTE_DND_TYPE` in
+ * its `dataTransfer` (`ObjectPalette.tsx`'s row `onDragStart`), and the drop
+ * point is converted from screen px to room cm via `viewport`'s own
+ * scale/pan — the exact inverse of what the Konva `Stage` itself applies.
  */
 export function Editor() {
   const viewport = useViewport();
-  useKeyboard();
+  useKeyboard(viewport);
+
+  function handleDragOver(e: DragEvent<HTMLDivElement>): void {
+    if (!e.dataTransfer.types.includes(PALETTE_DND_TYPE)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }
+
+  function handleDrop(e: DragEvent<HTMLDivElement>): void {
+    const type = e.dataTransfer.getData(PALETTE_DND_TYPE);
+    if (!isObjectType(type)) return;
+    e.preventDefault();
+    const container = viewport.containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const point = screenPointToRoomCm(viewport, e.clientX - rect.left, e.clientY - rect.top);
+    placeObject(type, point);
+  }
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
+      <TopBar viewport={viewport} />
       <div className="flex flex-1 overflow-hidden">
+        <ObjectPalette viewport={viewport} />
         <div
           className="grid flex-1 overflow-hidden"
           // Tailwind's arbitrary-value classes can't interpolate a JS constant,
@@ -63,14 +100,16 @@ export function Editor() {
           <RulerCorner />
           <Ruler orientation="top" length={viewport.width} />
           <Ruler orientation="left" length={viewport.height} />
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden" onDragOver={handleDragOver} onDrop={handleDrop}>
             <CanvasStage viewport={viewport} />
             <Readout />
             <ScaleBadge />
+            <Inspector />
           </div>
         </div>
       </div>
       <ContextMenu />
+      <Toast />
     </div>
   );
 }

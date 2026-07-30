@@ -5,6 +5,7 @@ import type Konva from 'konva';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
 import { snapPosition } from '@/lib/geometry/snap';
+import { duplicateObject } from '@/lib/doc/factory';
 import type { Cm, SceneObject } from '@/lib/types/doc';
 
 interface DragEntry { id: string; startX: Cm; startY: Cm; node: Konva.Node }
@@ -98,6 +99,29 @@ export function useObjectDrag(id: string): ObjectInteractionHandlers {
     if (useViewStore.getState().spaceHeld) return;
     const { selectedIds } = useViewStore.getState();
     const ids = selectedIds.includes(id) ? selectedIds : [id];
+
+    // Option/Alt-drag duplicates in place: every object about to move gets
+    // a same-position twin committed once, right here at gesture start —
+    // not per frame, so this doesn't collide with "never write to docStore
+    // during a drag" below. The dragged nodes keep their own ids and
+    // untouched starting positions; only new sibling objects are added, so
+    // the dragRef bookkeeping right after this is unaffected. The visible
+    // result matches the standard convention (drag away, a copy is left
+    // behind) without needing to redirect Konva's already-armed drag onto a
+    // not-yet-mounted node — the object under the pointer stays the one
+    // Konva is already dragging, and the copy is the one that stays put.
+    if (e.evt.altKey) {
+      useDocStore.getState().commit((d) => {
+        for (const oid of ids) {
+          const obj = d.objects[oid];
+          if (!obj) continue;
+          const copy = duplicateObject(obj, 0, 0);
+          d.objects[copy.id] = copy;
+          d.objectOrder.push(copy.id);
+        }
+      }, 'duplicate');
+    }
+
     dragRef.current = ids
       .map((oid) => {
         const node = oid === id ? e.target : stage.findOne(`#${oid}`);

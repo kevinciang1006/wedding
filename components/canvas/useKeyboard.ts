@@ -1,13 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDocStore } from '@/stores/docStore';
+import { useUiStore } from '@/stores/uiStore';
 import { useViewStore } from '@/stores/viewStore';
 import { isEditableTarget } from '@/components/canvas/useViewportKeyboard';
-import { duplicateObject } from '@/lib/doc/factory';
+import type { Viewport } from '@/components/canvas/useViewport';
+import { createObject, duplicateObject } from '@/lib/doc/factory';
 import { tableIdOfSeat } from '@/lib/doc/assignments';
+import { viewportCentreCm } from '@/lib/geometry/viewport';
+import { en } from '@/lib/i18n/en';
+import { es } from '@/lib/i18n/es';
 import { DUPLICATE_OFFSET, NUDGE, NUDGE_LARGE } from '@/lib/constants';
-import type { Cm } from '@/lib/types/doc';
+import type { Cm, ObjectType } from '@/lib/types/doc';
+
+const DICTIONARIES = { en, es };
 
 /** Moves every selected object by the same delta in one history entry. */
 function nudgeSelection(dx: Cm, dy: Cm): void {
@@ -21,6 +28,22 @@ function nudgeSelection(dx: Cm, dy: Cm): void {
       obj.y += dy;
     }
   }, 'nudge');
+}
+
+/**
+ * Adds a freshly created object of `type` at `at` (room cm) as one history
+ * entry and selects it — the one placement primitive behind the palette's
+ * click-to-place and drag-to-place (`ObjectPalette.tsx`, `Editor.tsx`'s drop
+ * handler) and the `T` new-table shortcut below, so all three ways of
+ * adding an object commit and select identically.
+ */
+export function placeObject(type: ObjectType, at: { x: Cm; y: Cm }): void {
+  const obj = createObject(type, at);
+  useDocStore.getState().commit((d) => {
+    d.objects[obj.id] = obj;
+    d.objectOrder.push(obj.id);
+  }, 'place');
+  useViewStore.getState().select([obj.id]);
 }
 
 /**
@@ -73,15 +96,29 @@ export function deleteSelection(): void {
  * Window-level shortcuts for selection and object manipulation: arrow nudge
  * (`Shift` for the large step), `Cmd/Ctrl+D` duplicate, `Delete`/
  * `Backspace` remove, `Cmd/Ctrl+A` select all, `Escape` clear selection
- * (and close the context menu, if open), `G` toggle grid snap, and
- * `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` undo/redo. Every branch bails via the
- * same `isEditableTarget` guard `useViewportKeyboard` already defines, so
- * this never duplicates that check. Takes no arguments and is called once
- * from `Editor.tsx`, alongside `useViewport()` — unlike `useMarquee`, none
- * of this needs the Stage or container refs, so it doesn't need to be
- * composed inside `useViewport` itself.
+ * (and close the context menu, if open), `G` toggle grid snap, `T` place a
+ * new round table at the viewport centre, `Cmd/Ctrl+E` the export toast
+ * (Task 15 owns the real feature; this just backs the top bar's visible
+ * `⌘E` hint so it isn't a lie), and `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z`
+ * undo/redo. Every branch bails via the same `isEditableTarget` guard
+ * `useViewportKeyboard` already defines, so this never duplicates that
+ * check.
+ *
+ * Takes the same `Viewport` instance `Editor.tsx` already holds (never a
+ * second `useViewport()` call — see that file's header comment) so `T` can
+ * place at the current viewport centre. `viewport` is a fresh object every
+ * render (`useViewport` doesn't memoise its return value), so it's mirrored
+ * into a ref — written in its own effect, never during render — rather than
+ * the main effect's own dependency array: depending on it directly there
+ * would tear down and re-add this window listener on every render of
+ * `Editor`, not just when a shortcut actually needs to fire.
  */
-export function useKeyboard(): void {
+export function useKeyboard(viewport: Viewport): void {
+  const viewportRef = useRef(viewport);
+  useEffect(() => {
+    viewportRef.current = viewport;
+  }, [viewport]);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
       if (isEditableTarget(document.activeElement)) return;
@@ -113,6 +150,18 @@ export function useKeyboard(): void {
         duplicateSelection();
         return;
       }
+      if (mod && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        // Real export is Task 15. This backs the top bar's visible `⌘E`
+        // hint with a real (if minimal) response rather than leaving a
+        // documented shortcut silently do nothing. Reads the dictionary
+        // directly, not `useT()` — this handler is imperative code outside
+        // a render, the same reason `duplicateSelection`/`deleteSelection`
+        // below read stores via `getState()` rather than a subscription.
+        const { language, showToast } = useUiStore.getState();
+        showToast(DICTIONARIES[language].exportComingSoon);
+        return;
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteSelection();
@@ -120,6 +169,11 @@ export function useKeyboard(): void {
       }
       if (!mod && e.key.toLowerCase() === 'g') {
         useViewStore.getState().toggleGridSnap();
+        return;
+      }
+      if (!mod && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        placeObject('roundTable', viewportCentreCm(viewportRef.current));
         return;
       }
 

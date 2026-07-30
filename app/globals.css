@@ -56,18 +56,29 @@
   border-radius: 0;
 }
 
-/* Reserve the focus ring's border space at rest so gaining it on focus never reflows the element. */
-:where(a, button, input, select, textarea, [tabindex]) {
+/* Reserve the focus ring's border space at rest so gaining it on focus never
+   reflows the element. Buttons and form controls only, not `a`: those are
+   boxes with their own padding, so a transparent border is invisible until
+   focus. A bare inline text link has no padding to absorb it — the same
+   1.5px on all four sides reads as the link sitting loose from the words
+   around it. Links get the box-shadow halo alone below, which never affects
+   layout at rest or on focus, so there is nothing for them to reserve. */
+:where(button, input, select, textarea, [tabindex]) {
   border-style: solid;
   border-width: 1.5px;
   border-color: transparent;
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+:where(button, input, select, textarea, [tabindex]):focus-visible {
   outline: none;
   border-style: solid;
   border-width: 1.5px;
   border-color: var(--color-cool);
+  box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
+}
+
+:where(a):focus-visible {
+  outline: none;
   box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
 }
 

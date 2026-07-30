@@ -9,6 +9,17 @@ export const es: Record<keyof typeof en, string> = {
   noRoomSet: 'sala sin definir',
   savedAgo: 'guardado {time}',
 
+  noDateSet: 'fecha sin definir',
+  undo: 'Deshacer',
+  redo: 'Rehacer',
+  zoomIn: 'Acercar',
+  zoomOut: 'Alejar',
+  roomWidth: 'Ancho de la sala',
+  roomHeight: 'Alto de la sala',
+  exportComingSoon: 'La exportación llega más adelante',
+  language: 'Idioma',
+  units: 'Unidades',
+
   room: 'sala',
   place: 'Colocar',
   roomSection: 'Sala',
@@ -22,6 +33,15 @@ export const es: Record<keyof typeof en, string> = {
   buffet: 'Buffet',
   textLabel: 'Etiqueta de texto',
   rectangle: 'Rectángulo',
+  dragDuplicateHint: 'arrastra para duplicar',
+
+  objectLabel: 'Etiqueta',
+  diameter: 'Diámetro',
+  seats: 'Asientos',
+  width: 'Ancho',
+  height: 'Alto',
+  seatsPerSide: 'Asientos/lado',
+  fontSize: 'Tamaño de fuente',
 
   shapeRound: 'redonda',
   shapeBanquet: 'rectangular',

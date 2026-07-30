@@ -37,6 +37,9 @@ interface DocActions {
   canRedo: boolean;
   undoLabel: string | null;
   redoLabel: string | null;
+  // When the debounced autosave last actually wrote to localStorage — read
+  // by the top bar's "saved {time}" text. `null` until the first write.
+  lastSavedAt: number | null;
 }
 
 export type DocState = Doc & DocActions;
@@ -50,6 +53,10 @@ function scheduleSave(doc: Doc): void {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     window.localStorage.setItem(LS_KEY, JSON.stringify(doc));
+    // Referencing useDocStore here (defined further down this module) is
+    // safe: this callback only ever runs once the timer fires, long after
+    // module evaluation has finished and the const is initialized.
+    useDocStore.setState({ lastSavedAt: Date.now() });
   }, AUTOSAVE_MS);
 }
 
@@ -80,7 +87,7 @@ function flags() {
 
 export const useDocStore = create<DocState>((set, get) => ({
   ...createEmptyDoc(),
-  canUndo: false, canRedo: false, undoLabel: null, redoLabel: null,
+  canUndo: false, canRedo: false, undoLabel: null, redoLabel: null, lastSavedAt: null,
 
   commit: (recipe, label) => {
     const [next, patches, inversePatches] = produceWithPatches(docOf(get()), recipe);

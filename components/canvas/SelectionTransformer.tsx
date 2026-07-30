@@ -127,7 +127,17 @@ export function SelectionTransformer() {
     // stops surviving after a Konva upgrade, delete rather than fight it.
     tr.findOne<Konva.Shape>('.back')?.fill(SELECTION_WASH);
     tr.getLayer()?.batchDraw();
-  }, [selectedIds]);
+    // `selectedObjects` (shallow-stable, see above) is also a dependency,
+    // not just `selectedIds`: undo/redo can remove the very object a
+    // selection still names — nothing clears `selectedIds` itself when that
+    // happens, since selection intentionally knows nothing about docStore
+    // (Readout/Inspector both already degrade gracefully, hiding once their
+    // object lookup returns `undefined`). Without this, `selectedIds`'s own
+    // reference never changes across that undo, so this effect would never
+    // re-run, and Konva's `Transformer` would keep pointing at a node
+    // react-konva already unmounted — a ghost handle floating at its last
+    // position rather than disappearing with the object it was attached to.
+  }, [selectedIds, selectedObjects]);
 
   // Rotation snaps to 15° increments only while Shift is held — Konva's own
   // `rotationSnaps` mechanism snaps by proximity to a fixed angle list
