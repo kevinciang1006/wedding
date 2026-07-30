@@ -32,6 +32,14 @@ export const HATCH_BAND = '#F6F8F9'; // dance floor's darker hatch band; the lig
 // components each inlining the same rgba string.
 export const SELECTION_WASH = 'rgba(30, 98, 168, 0.05)';
 
+// --- Rulers and measurement (Task 11) -----------------------------------
+export const RULER_TICK_MINOR = '#A7B3B9';
+export const RULER_TICK_MAJOR = '#6E7C84';
+export const RULER_EXTENT_TOP = '#DCE9F5';   // selection-extent band fill, top ruler
+export const RULER_EXTENT_LEFT = 'rgba(30, 98, 168, 0.13)'; // selection-extent band fill, left ruler
+export const COOL_DEEP = '#17497C';          // extent/position/snap-label text
+export const COOL_LIGHT = '#9CC4E8';         // live-drag distance line's end caps
+
 let cachedNameFont: string | null = null;
 let cachedDataFont: string | null = null;
 
@@ -54,4 +62,22 @@ export function canvasNameFont(): string {
 export function canvasDataFont(): string {
   cachedDataFont ??= resolveFontVar('--font-data', 'ui-monospace, monospace');
   return cachedDataFont;
+}
+
+let measureCtx: CanvasRenderingContext2D | null = null;
+
+/**
+ * Pixel width of `text` set in the data font at `fontSize` — sizes a Konva
+ * Rect "badge" behind a Text node before that Text has ever been painted.
+ * Konva has no DOM-style layout pass to measure against, but a detached
+ * canvas 2D context does the exact same text-shaping the browser paints
+ * with, so this measures precisely rather than estimating from character
+ * count. Used by the live-drag distance badge and the snap label, both of
+ * which auto-size to their (variable-length, unit-dependent) text.
+ */
+export function measureMonoTextWidth(text: string, fontSize: number): number {
+  measureCtx ??= document.createElement('canvas').getContext('2d');
+  if (!measureCtx) return text.length * fontSize * 0.6;
+  measureCtx.font = `${fontSize}px ${canvasDataFont()}`;
+  return measureCtx.measureText(text).width;
 }

@@ -18,6 +18,15 @@ export const en = {
   textLabel: 'Text label',
   rectangle: 'Rectangle',
 
+  // Short shape words for the readout's header summary ("round · 10 seats ·
+  // 10 seated") — distinct from the palette's full names above, which
+  // already say "table."
+  shapeRound: 'round',
+  shapeBanquet: 'banquet',
+  shapeSweetheart: 'sweetheart',
+  shapeHead: 'head',
+  tableSummary: '{shape} · {total} seats · {seated} seated',
+
   exportPlan: 'Export plan',
   planExported: 'Plan exported',
   showFile: 'Show file',

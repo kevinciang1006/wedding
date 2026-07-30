@@ -23,6 +23,12 @@ export const es: Record<keyof typeof en, string> = {
   textLabel: 'Etiqueta de texto',
   rectangle: 'Rectángulo',
 
+  shapeRound: 'redonda',
+  shapeBanquet: 'rectangular',
+  shapeSweetheart: 'de novios',
+  shapeHead: 'presidencial',
+  tableSummary: '{shape} · {total} asientos · {seated} sentados',
+
   exportPlan: 'Exportar plano',
   planExported: 'Plano exportado',
   showFile: 'Mostrar archivo',

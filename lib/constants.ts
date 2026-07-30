@@ -44,3 +44,20 @@ export const TRANSFORMER_BORDER_DASH_PX: [number, number] = [4, 4];
 export const ROTATE_HANDLE_PX = 10;
 export const ROTATE_HANDLE_OFFSET_PX = 32;
 export const GUIDE_MARKER_PX = 13;
+
+// Rulers and measurement readout (Task 11). RULER_* live inside a ruler's
+// own small, unscaled Konva Stage (1 Konva unit = 1 screen px there) and are
+// used as literal px. Everything else here is drawn inside the MAIN (scaled)
+// Stage and is divided by stage scale before use — same rule as
+// SNAP_PX/DIETARY_DOT_SCREEN_PX above.
+export const RULER_MINOR_TICK_PX = 5;
+export const RULER_MAJOR_TICK_PX = 10;
+export const RULER_LABEL_FONT_PX = 9;
+export const RULER_LABEL_INSET_PX = 3; // gap between a tick's line and its label
+export const RULER_EXTENT_CAP_PX = 2;  // the selection-extent band's inner-edge cap
+
+export const DRAG_CAP_PX = 18;           // full length of a live-drag distance line's end cap
+export const MEASURE_BADGE_FONT_PX = 9.5; // live-drag badge + snap label text
+export const MEASURE_BADGE_PAD_X_PX = 5;
+export const MEASURE_BADGE_PAD_Y_PX = 1;
+export const SNAP_LABEL_OFFSET_PX = 10;  // snap label's clearance from its guide's marker

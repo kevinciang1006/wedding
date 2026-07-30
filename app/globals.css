@@ -16,6 +16,7 @@
   --color-divider-light: #dfe6e9;
   --color-panel-border: #d5dee2;
   --color-ruler-border: #c6d0d6;
+  --color-readout-border: #9eaeb8;
   --color-seat-stroke: #c3cdd3;
   --color-object-stroke: #b7c3ca;
   --color-text-disabled: #b3bdc3;
@@ -47,6 +48,7 @@
      later dropdown/toast that isn't the bottom-left readout HUD, which gets
      its own, tighter "readout" shadow instead). */
   --shadow-screen: 0 4px 28px rgba(20, 32, 40, 0.12);
+  --shadow-readout: 0 2px 10px rgba(20, 32, 40, 0.10);
 }
 
 /* Drafting chrome: square corners everywhere except circles. */

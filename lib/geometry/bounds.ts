@@ -73,6 +73,19 @@ export function isOutsideRoom(bounds: Aabb, room: { width: Cm; height: Cm }): bo
  * tasks may call directly, so it stays total rather than trusting every future
  * caller to pre-guard.
  */
+/**
+ * Shortest distance between two AABBs — 0 the moment they touch or overlap
+ * on either axis, otherwise the straight-line gap between their nearest
+ * edges/corners. Used by the readout's `CLEAR` field: "how much floor is
+ * free between this object and its nearest neighbour," which is a genuine
+ * 2D gap, not just a same-axis difference.
+ */
+export function aabbGap(a: Aabb, b: Aabb): Cm {
+  const dx = Math.max(a.left - b.right, b.left - a.right, 0);
+  const dy = Math.max(a.top - b.bottom, b.top - a.bottom, 0);
+  return Math.hypot(dx, dy);
+}
+
 export function unionBounds(boxes: Aabb[]): Aabb | null {
   if (boxes.length === 0) return null;
   const left = Math.min(...boxes.map((b) => b.left));
