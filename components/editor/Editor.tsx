@@ -11,18 +11,12 @@ import { ObjectPalette } from '@/components/chrome/ObjectPalette';
 import { Toast } from '@/components/chrome/Toast';
 import { Inspector } from '@/components/inspector/Inspector';
 import { GuestPanel } from '@/components/guests/GuestPanel';
-import { useDocStore } from '@/stores/docStore';
 import { useUiStore } from '@/stores/uiStore';
 import { useViewport } from '@/components/canvas/useViewport';
 import { useKeyboard, placeObject } from '@/components/canvas/useKeyboard';
 import { screenPointToRoomCm } from '@/lib/geometry/viewport';
 import { isObjectType, PALETTE_DND_TYPE } from '@/lib/dnd';
 import { RULER_SIZE } from '@/lib/constants';
-
-// TEMP-TASK-13-SEED: manual verification hook, removed before commit.
-if (typeof window !== 'undefined') {
-  (window as unknown as { __setting: unknown }).__setting = { useDocStore, useUiStore };
-}
 
 /**
  * The client root. The 52px top bar is the first child of the outer column;
