@@ -7,6 +7,7 @@ import { ObjectsLayer } from '@/components/canvas/ObjectsLayer';
 import { Ruler, RulerCorner } from '@/components/canvas/Ruler';
 import { TableHighlight } from '@/components/mobile/TableHighlight';
 import { useMobileViewport } from '@/components/mobile/useMobileViewport';
+import { useViewStore } from '@/stores/viewStore';
 import { useT } from '@/lib/i18n/useT';
 import { MOBILE_PLAN_HEIGHT_PX, RULER_SIZE, ZOOM_KEY_STEP } from '@/lib/constants';
 
@@ -38,6 +39,20 @@ export function MobilePlan({ tableId }: MobilePlanProps) {
     containerRef, stageRef, width, height, scale, x, y, draggable,
     fitToRoom, zoomBy, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, handleDragMove,
   } = useMobileViewport();
+
+  // Nothing is selected here, because nothing here CAN be selected. The
+  // stores outlive the layout swap, so a table selected in the editor before
+  // a resize (or an orientation change) is still in `viewStore.selectedIds`
+  // when this mounts — and `Ruler` draws its cool selection-extent band for
+  // any single selection, which is an editing affordance appearing on a
+  // read-only surface. Caught in the browser: the phone rulers were banding a
+  // head table selected at 1440px moments earlier.
+  useEffect(() => {
+    const view = useViewStore.getState();
+    view.clearSelection();
+    view.setGuides([]);
+    view.setDragDistance(null);
+  }, []);
 
   // A guest who has already panned or zoomed, then searched, must not be
   // left looking at an empty corner of the room while their ring sits off

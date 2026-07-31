@@ -12,8 +12,14 @@ describe('dictionaries', () => {
   });
 
   it('have no empty strings', () => {
-    for (const [key, value] of Object.entries({ ...en, ...es })) {
-      expect(value.length, `empty translation for ${key}`).toBeGreaterThan(0);
+    // Iterated separately, NOT as `{ ...en, ...es }`: the key sets are
+    // identical by the test above, so spreading means `es` overwrites every
+    // `en` value and English is never examined at all — the test would have
+    // covered half of what its name claims.
+    for (const [language, dict] of Object.entries({ en, es })) {
+      for (const [key, value] of Object.entries(dict)) {
+        expect(value.length, `empty ${language} translation for ${key}`).toBeGreaterThan(0);
+      }
     }
   });
 
