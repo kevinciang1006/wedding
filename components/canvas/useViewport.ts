@@ -5,7 +5,8 @@ import type { RefObject } from 'react';
 import type Konva from 'konva';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
-import { FIT_PADDING, MAX_SCALE, MIN_SCALE } from '@/lib/constants';
+import { FIT_PADDING } from '@/lib/constants';
+import { centredView, fitView, zoomAt } from '@/lib/geometry/viewport';
 import { useElementSize } from '@/components/canvas/useElementSize';
 import { useViewportKeyboard } from '@/components/canvas/useViewportKeyboard';
 import { useGesturePinch } from '@/components/canvas/useGesturePinch';
@@ -38,27 +39,6 @@ export interface Viewport {
   handleDragEnd: () => void;
 }
 
-function clampScale(scale: number): number {
-  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
-}
-
-// Scale + position that puts the room's centre at the viewport's centre,
-// shared by fit-to-room and reset-zoom (which only differ in what scale
-// they centre at).
-function centeredView(
-  scale: number,
-  viewportWidth: number,
-  viewportHeight: number,
-  room: { width: number; height: number },
-): { scale: number; x: number; y: number } {
-  const clamped = clampScale(scale);
-  return {
-    scale: clamped,
-    x: viewportWidth / 2 - (room.width / 2) * clamped,
-    y: viewportHeight / 2 - (room.height / 2) * clamped,
-  };
-}
-
 /**
  * Viewport transform maths and Konva pointer/drag wiring, composed with the
  * four concerns that live in their own hooks: `useElementSize` (container
@@ -83,38 +63,26 @@ export function useViewport(): Viewport {
 
   const [cursor, setCursor] = useState<CursorStyle>('default');
 
-  // Zoom toward the pointer, never the origin: reproject the pointer's
-  // world-space position at the OLD scale, then choose x/y so that same
-  // world point lands back under the pointer at the NEW scale. Reads the
-  // Konva node directly (not the store) because this also has to be
-  // correct mid-gesture, before a React render has caught up.
+  // Zoom toward the pointer, never the origin (`zoomAt`, shared with the
+  // mobile viewer). The CURRENT transform is read off the Konva node rather
+  // than the store because this also has to be correct mid-gesture, before a
+  // React render has caught up.
   const zoomToPointer = useCallback((stage: Konva.Stage, nextScale: number, pointer: Konva.Vector2d) => {
-    const old = stage.scaleX();
-    const clamped = clampScale(nextScale);
-    const world = { x: (pointer.x - stage.x()) / old, y: (pointer.y - stage.y()) / old };
-    setView({
-      scale: clamped,
-      x: pointer.x - world.x * clamped,
-      y: pointer.y - world.y * clamped,
-    });
+    setView(zoomAt({ scale: stage.scaleX(), x: stage.x(), y: stage.y() }, nextScale, pointer));
   }, [setView]);
 
   const fitToRoom = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const fit = Math.min(
-      rect.width / (room.width + FIT_PADDING * 2),
-      rect.height / (room.height + FIT_PADDING * 2),
-    );
-    setView(centeredView(fit, rect.width, rect.height, room));
+    setView(fitView(rect.width, rect.height, room, FIT_PADDING));
   }, [room, setView, containerRef]);
 
   const resetZoom = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    setView(centeredView(1, rect.width, rect.height, room));
+    setView(centredView(1, rect.width, rect.height, room));
   }, [room, setView, containerRef]);
 
   const zoomBy = useCallback((factor: number, pointer: Konva.Vector2d) => {

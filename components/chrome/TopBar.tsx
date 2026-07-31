@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { useDocStore } from '@/stores/docStore';
 import { useUiStore } from '@/stores/uiStore';
 import { useT } from '@/lib/i18n/useT';
+import { formatEventDate } from '@/lib/i18n/date';
 import { useCommitField } from '@/components/chrome/useCommitField';
 import { ExportMenu } from '@/components/chrome/ExportMenu';
 import { formatValue, parseLength } from '@/lib/units/format';
@@ -34,15 +35,6 @@ function useNow(intervalMs: number): number {
   return now;
 }
 
-function formatEventDate(language: 'en' | 'es', noDateSet: string, eventDate: string | null): string {
-  if (!eventDate) return noDateSet;
-  // Appending a local midnight time avoids `new Date('yyyy-mm-dd')` parsing
-  // as UTC, which can print a day earlier than the stored date in any
-  // timezone west of UTC — a wedding date is a calendar day, not an instant.
-  const parsed = new Date(`${eventDate}T00:00:00`);
-  return new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en-US', { dateStyle: 'medium' }).format(parsed);
-}
-
 /** Compact, language-agnostic elapsed time (`5s`/`2m`/`1h`/`3d`) — same non-translated convention as the app's own `cm`/`m`/`ft` unit suffixes. */
 function formatSavedAgo(savedAgo: (time: string) => string, lastSavedAt: number | null, now: number): string | null {
   if (lastSavedAt === null) return null;
@@ -61,7 +53,7 @@ function Segmented<T extends string>({
   ariaLabel, options, value, onChange,
 }: { ariaLabel: string; options: SegmentedOption<T>[]; value: T; onChange: (v: T) => void }) {
   return (
-    <div role="group" aria-label={ariaLabel} className="flex h-[26px] border border-rule bg-paper">
+    <div role="group" aria-label={ariaLabel} className="flex h-[26px] shrink-0 border border-rule bg-paper">
       {options.map((opt, i) => (
         <button
           key={opt.value}
@@ -150,7 +142,7 @@ export function TopBar({ viewport }: TopBarProps) {
 
   const now = useNow(30_000);
 
-  const dateText = formatEventDate(language, t('noDateSet'), eventDate);
+  const dateText = formatEventDate(language, eventDate, t('noDateSet'));
   const savedText = formatSavedAgo((time) => t('savedAgo', { time }), lastSavedAt, now);
   const subtitle = savedText ? `${dateText} · ${savedText}` : dateText;
 
@@ -158,13 +150,24 @@ export function TopBar({ viewport }: TopBarProps) {
   const zoomPercent = Math.round(viewport.scale * 100);
 
   return (
-    <div className="flex h-[52px] shrink-0 items-center gap-3.5 border-b border-panel-border bg-paper px-3">
-      <div className="flex items-center gap-2">
+    // Everything except the plan title/date is `shrink-0`, and that one block
+    // is `min-w-0` and truncates: at the narrow end of the editor's range
+    // (768px, Spanish, where every label is longer) the bar is otherwise
+    // over-full, and flex resolves that by shrinking every group past its
+    // content — controls overlap each other and the title's text runs
+    // straight through the room dimensions. The plan name is the one thing
+    // here that can lose characters without losing meaning.
+    // Below 1024px the gaps tighten and the wordmark drops to its mark
+    // alone: nine 14px gaps plus the spelled-out name are 114px that the
+    // plan's own title needs more at that width, and the mark still carries
+    // the identity.
+    <div className="flex h-[52px] shrink-0 items-center gap-3.5 border-b border-panel-border bg-paper px-3 max-lg:gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <div className="relative h-5 w-5 border-[1.5px] border-ink">
           <div className="absolute left-[3px] top-[3px] h-1.5 w-1.5 rounded-full border-[1.5px] border-warm" />
           <div className="absolute bottom-[2px] right-[2px] h-[1.5px] w-2 bg-cool" />
         </div>
-        <span className="font-[family-name:var(--font-ui)] text-[13px] font-bold uppercase tracking-[0.06em] text-ink">
+        <span className="font-[family-name:var(--font-ui)] text-[13px] font-bold uppercase tracking-[0.06em] text-ink max-lg:hidden">
           {t('appName')}
         </span>
       </div>
@@ -175,14 +178,19 @@ export function TopBar({ viewport }: TopBarProps) {
         <span className="truncate font-[family-name:var(--font-name)] text-[16px] text-ink">
           {title || t('untitledPlan')}
         </span>
-        <span className="shrink-0 whitespace-nowrap font-[family-name:var(--font-data)] text-[10.5px] text-text-muted">
+        {/* Hidden below 1024px — the tablet layout, where the bar is full
+            and two truncating siblings would leave both showing an ellipsis
+            and nothing else. The plan's name earns the remaining space; the
+            date and save state are secondary, and the save state is not the
+            only sign the document is safe. */}
+        <span className="truncate font-[family-name:var(--font-data)] text-[10.5px] text-text-muted max-lg:hidden">
           {subtitle}
         </span>
       </div>
 
-      <div className="flex-1" />
+      <div className="min-w-0 flex-1" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <span className="font-[family-name:var(--font-data)] text-[11px] text-text-secondary">{t('room')}</span>
         <RoomDimInput
           id={ROOM_WIDTH_INPUT_ID}
@@ -208,12 +216,12 @@ export function TopBar({ viewport }: TopBarProps) {
 
       <Divider />
 
-      <div className="flex gap-1">
+      <div className="flex shrink-0 gap-1">
         <IconButton label={t('undo')} enabled={canUndo} onClick={undo}>↶</IconButton>
         <IconButton label={t('redo')} enabled={canRedo} onClick={redo}>↷</IconButton>
       </div>
 
-      <div className="flex h-[26px] items-center gap-1.5 border border-rule bg-paper px-1">
+      <div className="flex h-[26px] shrink-0 items-center gap-1.5 border border-rule bg-paper px-1">
         <button
           type="button"
           aria-label={t('zoomOut')}

@@ -155,13 +155,13 @@ export function ExportMenu({ viewport }: ExportMenuProps) {
   }
 
   return (
-    <div ref={wrapperRef} className="relative">
+    <div ref={wrapperRef} className="relative shrink-0">
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={toggle}
-        className="flex h-7 items-center gap-2 bg-ink px-3.5 font-[family-name:var(--font-ui)] text-[12.5px] font-medium text-paper"
+        className="flex h-7 items-center gap-2 whitespace-nowrap bg-ink px-3.5 font-[family-name:var(--font-ui)] text-[12.5px] font-medium text-paper"
       >
         {t('exportPlan')}
         <span className="font-[family-name:var(--font-data)] text-[10px] text-[#93A0A7]">⌘E</span>

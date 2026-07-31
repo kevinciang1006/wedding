@@ -40,6 +40,13 @@ export const RULER_EXTENT_LEFT = 'rgba(30, 98, 168, 0.13)'; // selection-extent 
 export const COOL_DEEP = '#17497C';          // extent/position/snap-label text
 export const COOL_LIGHT = '#9CC4E8';         // live-drag distance line's end caps
 
+// --- Mobile viewer (Task 17) --------------------------------------------
+// The searched guest's table: a crisp warm ring at the table's own outline,
+// with the same translucent warm halo just outside it that the design gives
+// the highlighted table on the phone (`0 0 0 5px rgba(184,118,42,0.18)`).
+export const HIGHLIGHT_RING = WARM;
+export const HIGHLIGHT_GLOW = 'rgba(184, 118, 42, 0.18)';
+
 let cachedNameFont: string | null = null;
 let cachedDataFont: string | null = null;
 

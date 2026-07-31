@@ -73,6 +73,20 @@
   border-color: transparent;
 }
 
+/* A field that draws its own box instead of sitting inside a bordered
+   wrapper — the mobile viewer's search field, which the design gives a
+   visible 48px box and a focus ring around that whole box, not around the
+   text node inside it.
+
+   It has to live here rather than as a `border-rule` utility on the element:
+   the rules in this file are unlayered and Tailwind's utilities are not, so
+   an unlayered `border-color: transparent` above always wins over any
+   utility regardless of specificity. Sits BEFORE the focus rule and at the
+   same specificity (one class), so focus still recolours it. */
+.field-boxed {
+  border-color: var(--color-rule);
+}
+
 :where(button, input, select, textarea, [tabindex]):focus-visible {
   outline: none;
   border-style: solid;
@@ -84,6 +98,47 @@
 :where(a):focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
+}
+
+/* Touch layouts (the 768–1023px editor and the phone viewer, both marked by
+   `data-touch` on their root): every control reaches at least 44px in both
+   axes.
+
+   The target grows as a centred pseudo-element rather than as padding or a
+   min-height, so a control's drawn size — and with it the whole drafting
+   chrome's density, which is the point of this interface — is unchanged;
+   only the area that answers a finger grows. `max(100%, 44px)` leaves
+   anything already larger alone. Controls this dense inevitably end up with
+   targets that overlap their neighbours' by a few px; every control's own
+   centre is still unambiguously its own.
+
+   Inputs take a min-height instead: `::before`/`::after` do not render on
+   replaced elements, so there is no pseudo-element to grow.
+
+   These three sit in `@layer base` — unlike everything else in this file,
+   which is deliberately unlayered so it beats Tailwind's utilities. Here the
+   opposite is wanted: `position: relative` is only a default for buttons
+   that have no position of their own, and a button a component explicitly
+   places (`absolute`, for a field's inline "clear") must keep that. Being in
+   an earlier layer than `utilities` is what lets any such utility win. */
+@layer base {
+  [data-touch='true'] :where(button, [role='button']) {
+    position: relative;
+  }
+
+  [data-touch='true'] :where(button, [role='button'])::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+
+  [data-touch='true'] :where(input, select, textarea) {
+    min-height: 44px;
+  }
 }
 
 /* The only animation in the product: a guest settling into a seat. */

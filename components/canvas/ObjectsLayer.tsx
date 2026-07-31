@@ -40,6 +40,18 @@ const ObjectNode = memo(function ObjectNode({ id }: ObjectNodeProps): ReactEleme
   }
 });
 
+interface ObjectsLayerProps {
+  /**
+   * False on the mobile viewer (Task 17), where the same objects are drawn
+   * but nothing may be edited. Konva's `listening` cascades to every
+   * descendant's hit-testing, so one flag here disables object drag,
+   * selection, the context menu and the seat menu at their source — rather
+   * than each node having to learn a read-only mode it would then be
+   * possible to get wrong in one place.
+   */
+  interactive?: boolean;
+}
+
 /**
  * Renders every object in z-order. Subscribes to `objectOrder` alone —
  * never to `objects` — so adding, removing, or reordering objects is the
@@ -47,7 +59,7 @@ const ObjectNode = memo(function ObjectNode({ id }: ObjectNodeProps): ReactEleme
  * (a drag, a rename, a seat assignment) is invisible here and handled
  * entirely inside that object's own node, per-id.
  */
-export function ObjectsLayer() {
+export function ObjectsLayer({ interactive = true }: ObjectsLayerProps) {
   const objectOrder = useDocStore((s) => s.objectOrder);
   const layerRef = useRef<Konva.Layer | null>(null);
 
@@ -65,7 +77,7 @@ export function ObjectsLayer() {
     // a click/drag/right-click target, via each node's own `useObjectDrag`.
     // Seats stay opted out individually within TableNode; Task 14 owns
     // making them real drop targets.
-    <Layer ref={layerRef}>
+    <Layer ref={layerRef} listening={interactive}>
       {objectOrder.map((id) => <ObjectNode key={id} id={id} />)}
     </Layer>
   );

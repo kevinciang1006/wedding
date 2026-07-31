@@ -65,6 +65,31 @@ export const SNAP_LABEL_OFFSET_PX = 10;  // snap label's clearance from its guid
 // Guest-to-seat pointer drag (Task 14).
 export const GUEST_DRAG_ARM_PX = 4; // screen px of movement before pointerdown becomes a drag, not a click
 
+// Responsive breakpoints (Task 17), in CSS px. At or below PHONE_MAX_PX the
+// app renders the read-only mobile viewer instead of the editor; between
+// that and TABLET_MAX_PX it is the full editor with the palette and guest
+// panel as slide-over sheets and pointer targets grown to 44px; above, the
+// full editor with both panels docked. Read through `matchMedia`
+// (components/mobile/useLayout.ts), never by CSS alone — the phone boundary
+// decides whether a Konva editor stage is mounted at all, which no media
+// query can express.
+//
+// The 44px target itself is not a constant here: it is only ever used by the
+// `[data-touch]` rules in `app/globals.css`, and CSS cannot read a TS export.
+// A second copy of the number living here that nothing imports would be a
+// constant to keep in sync, not a source of truth.
+export const PHONE_MAX_PX = 767;
+export const TABLET_MAX_PX = 1023;
+
+// The mobile viewer's plan window (Task 17): its fixed height, and the warm
+// ring drawn around the searched guest's table. The ring measures are screen
+// px — divided by stage scale before use, same rule as SNAP_PX above.
+export const MOBILE_PLAN_HEIGHT_PX = 300;
+export const MOBILE_RING_PX = 2;
+export const MOBILE_RING_GLOW_PX = 5;
+export const MOBILE_TABLEMATE_CHIPS = 5;
+export const MOBILE_MATCH_LIST_MAX = 8;
+
 // Empty state and first-load restore (Task 16). The top bar's room-width
 // input needs a stable DOM id so the "Start empty" card can hand it focus
 // after creating a blank doc — "sets the room size" means literally landing
