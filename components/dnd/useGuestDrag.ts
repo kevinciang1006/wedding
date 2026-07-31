@@ -11,15 +11,22 @@ import { GUEST_DRAG_ARM_PX, SEAT_DROP_RANGE } from '@/lib/constants';
 
 /**
  * The seat, if any, within `SEAT_DROP_RANGE` of a client (screen) point —
- * reads the live Konva `Stage` directly via `Konva.stages[0]` rather than
- * `viewStore`'s own scale/x/y, the same reasoning `useViewport.ts`'s
- * `zoomToPointer` gives for doing the same: this needs to be correct on
- * every raw pointermove of a gesture, not just after React has caught up to
- * a store write. `Konva.stages[0]` is safe here specifically because this
- * app only ever mounts the one `CanvasStage` — see `CanvasStage.tsx`.
+ * reads the live Konva `Stage` directly rather than `viewStore`'s own
+ * scale/x/y, the same reasoning `useViewport.ts`'s `zoomToPointer` gives for
+ * doing the same: this needs to be correct on every raw pointermove of a
+ * gesture, not just after React has caught up to a store write.
+ *
+ * `Konva.stages` is a flat global array of every mounted Stage, not just the
+ * main canvas one — the two `Ruler` gutters each own their own small,
+ * unscaled Stage too (`Ruler.tsx`), and mount BEFORE the main one in
+ * `Editor.tsx`'s JSX order, so `Konva.stages[0]` is actually a ruler, not the
+ * canvas. `CanvasStage.tsx` names its Stage `"main-stage"` specifically so
+ * this can find the right one regardless of mount order — the same
+ * name-based-lookup convention `lib/io/png.ts` already uses for
+ * `OverlayLayer`'s `name="overlay-layer"`.
  */
 function hitTestSeat(seatPoints: ReturnType<typeof flattenSeatPoints>, clientX: number, clientY: number): string | null {
-  const stage = Konva.stages[0];
+  const stage = Konva.stages.find((s) => s.name() === 'main-stage');
   if (!stage) return null;
   const rect = stage.container().getBoundingClientRect();
   const world = screenPointToRoomCm(

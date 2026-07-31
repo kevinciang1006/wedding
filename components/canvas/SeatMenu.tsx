@@ -60,19 +60,35 @@ function SeatMenuPanel({ menu }: { menu: SeatMenuTarget }) {
     const guestId = s.seatAssignments[menu.seatId];
     return guestId ? (s.guests[guestId] ?? null) : null;
   });
-  const candidates = useDocStore(useShallow((s): Candidate[] => {
-    const occupantId = s.seatAssignments[menu.seatId] ?? null;
-    return s.guestOrder
-      .filter((id) => id !== occupantId)
-      .map((id) => s.guests[id])
-      .filter((g) => g !== undefined && g.rsvp !== 'no')
-      .filter((g) => occupantId !== null || seatOfGuest(s.seatAssignments, g.id) === null)
-      .map((g) => {
-        const seatId = seatOfGuest(s.seatAssignments, g.id);
-        const table = seatId ? s.objects[tableIdOfSeat(seatId)] : undefined;
-        return { id: g.id, name: g.name, tableLabel: table?.label ?? null, seatIndex: seatId ? seatIndexOfSeat(seatId) : null };
-      });
-  }));
+  // Four narrow, reference-stable reads (Immer keeps each of these the same
+  // object across a commit that doesn't touch it) rather than one
+  // `useShallow`-wrapped selector building `Candidate[]` directly: `useShallow`
+  // only shallow-compares ONE level deep, and an array of freshly-`.map()`ed
+  // plain objects never satisfies that — each element is a new object every
+  // call even when its contents are identical, so the store would report a
+  // "changed" snapshot on every read and React's own `useSyncExternalStore`
+  // guard turns that into an infinite render loop (caught live in browser
+  // verification, not just reasoned about — see the Task 14 report). Deriving
+  // `candidates` as a plain computation in the render body below, from these
+  // stable inputs, sidesteps the whole class of bug: Zustand never has to
+  // decide whether the *array* changed, only whether `guests`/`seatAssignments`
+  // /`objects`/`guestOrder` did.
+  const guests = useDocStore((s) => s.guests);
+  const seatAssignments = useDocStore((s) => s.seatAssignments);
+  const objects = useDocStore((s) => s.objects);
+  const guestOrder = useDocStore((s) => s.guestOrder);
+
+  const occupantId = seatAssignments[menu.seatId] ?? null;
+  const candidates: Candidate[] = guestOrder
+    .filter((id) => id !== occupantId)
+    .map((id) => guests[id])
+    .filter((g) => g !== undefined && g.rsvp !== 'no')
+    .filter((g) => occupantId !== null || seatOfGuest(seatAssignments, g.id) === null)
+    .map((g) => {
+      const seatId = seatOfGuest(seatAssignments, g.id);
+      const table = seatId ? objects[tableIdOfSeat(seatId)] : undefined;
+      return { id: g.id, name: g.name, tableLabel: table?.label ?? null, seatIndex: seatId ? seatIndexOfSeat(seatId) : null };
+    });
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -144,6 +160,17 @@ function SeatMenuPanel({ menu }: { menu: SeatMenuTarget }) {
           placeholder={t('searchGuests')}
           value={query}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+          // useKeyboard.ts's global Escape handler bails on any editable
+          // target (isEditableTarget) before it ever reaches its own
+          // closeSeatMenu() call, precisely so it never steps on a field's
+          // own Escape semantics (the same reason `useCommitField` owns its
+          // input's Escape locally) — but this input autofocuses the instant
+          // the menu opens, so without a local handler here Escape would
+          // silently do nothing for the one control most likely to have
+          // focus. Handled here instead, not by special-casing Escape in the
+          // shared guard, which would also change Escape's behaviour for
+          // every OTHER editable-target-guarded field in the app.
+          onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
           className="h-6 w-full border border-rule bg-paper px-1.5 font-[family-name:var(--font-ui)] text-[12px] text-ink outline-none"
         />
       </div>

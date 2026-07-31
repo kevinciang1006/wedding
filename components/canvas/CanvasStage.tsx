@@ -50,6 +50,14 @@ export function CanvasStage({ viewport }: CanvasStageProps) {
     <div ref={containerRef} className="h-full w-full overflow-hidden bg-canvas">
       <Stage
         ref={stageRef}
+        // A Konva selector (matches `OverlayLayer.tsx`'s own `name="overlay-layer"`
+        // convention for its Layer), not a CSS one: `Konva.stages` is a flat
+        // global array of every mounted Stage — the two Ruler gutters each
+        // own one too (`Ruler.tsx`) — so `components/dnd/useGuestDrag.ts`,
+        // which runs from event handlers with no access to this component's
+        // own `stageRef`, finds THIS stage specifically by name rather than
+        // assuming a mount-order index.
+        name="main-stage"
         width={width}
         height={height}
         scaleX={scale}
