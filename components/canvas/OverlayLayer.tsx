@@ -16,10 +16,15 @@ import { SelectionTransformer } from '@/components/canvas/SelectionTransformer';
  * pointer events to be draggable at all. `Marquee`, `AlignmentGuides`,
  * `LiveDistance` and `DuplicateGhosts` opt their own shapes out individually
  * instead.
+ *
+ * `name="overlay-layer"` is a Konva selector, not a CSS one — it's how
+ * `lib/io/png.ts`'s PNG export finds and hides this exact layer by name
+ * (`stage.findOne('.overlay-layer')`) rather than assuming it's always the
+ * Stage's last child.
  */
 export function OverlayLayer() {
   return (
-    <Layer>
+    <Layer name="overlay-layer">
       <Marquee />
       <AlignmentGuides />
       <LiveDistance />

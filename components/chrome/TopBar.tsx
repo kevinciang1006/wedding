@@ -233,7 +233,7 @@ export function TopBar({ viewport }: TopBarProps) {
         </button>
       </div>
 
-      <ExportMenu />
+      <ExportMenu viewport={viewport} />
 
       <Segmented
         ariaLabel={t('language')}

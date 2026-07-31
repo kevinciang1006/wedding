@@ -6,7 +6,9 @@ import { getDoc, useDocStore } from '@/stores/docStore';
 import { useUiStore } from '@/stores/uiStore';
 import { useT } from '@/lib/i18n/useT';
 import { docToJson, parseDocJson, DocVersionError } from '@/lib/io/json';
-import { downloadUrl, planFilename } from '@/lib/io/download';
+import { downloadUrl, dataUrlToBlobUrl, planFilename } from '@/lib/io/download';
+import { exportPng } from '@/lib/io/png';
+import type { Viewport } from '@/components/canvas/useViewport';
 
 // How long a JSON export's object URL is kept alive: long enough that the
 // toast's own "Show file" link (which opens this exact URL) still works for
@@ -31,6 +33,8 @@ function MenuItem({ label, onSelect }: MenuItemProps) {
   );
 }
 
+interface ExportMenuProps { viewport: Viewport }
+
 /**
  * The top bar's export button and its dropdown: Export image (PNG) / Export
  * PDF / Export data (JSON) / Import plan. A plain boolean in `uiStore`
@@ -38,12 +42,13 @@ function MenuItem({ label, onSelect }: MenuItemProps) {
  * (`useKeyboard.ts`) toggles the same menu from outside React's render
  * tree — it can only reach a store, not this component's own `useState`.
  *
- * PNG and PDF export land in later commits of this same task; this file
- * currently wires JSON export and JSON import only, so every visible menu
- * item does something real — no disabled/stub entries waiting on code that
- * doesn't exist yet.
+ * Takes `viewport` (the one instance `Editor.tsx` owns, threaded down
+ * through `TopBar`) purely for its `stageRef`: PNG export reads the live
+ * Konva `Stage` directly rather than through any store, since the crop
+ * rect it needs (`lib/io/png.ts`) depends on the Stage's own current
+ * pan/zoom transform, not persisted document state.
  */
-export function ExportMenu() {
+export function ExportMenu({ viewport }: ExportMenuProps) {
   const t = useT();
   const open = useUiStore((s) => s.exportMenuOpen);
   const toggle = useUiStore((s) => s.toggleExportMenu);
@@ -82,6 +87,23 @@ export function ExportMenu() {
     downloadUrl(url, planFilename(doc.title, 'json'));
     showToast(t('planExported'), null, { label: t('showFile'), onClick: () => window.open(url, '_blank') });
     setTimeout(() => URL.revokeObjectURL(url), OBJECT_URL_LIFETIME_MS);
+    close();
+  }
+
+  function handleExportPng(): void {
+    // No stage yet (mounted-but-not-yet-measured, or this menu somehow
+    // reachable before `CanvasStage` itself is): nothing to rasterize, and
+    // silently no-op is safer than a crash on a menu click.
+    const stage = viewport.stageRef.current;
+    if (!stage) return;
+    const doc = getDoc();
+    const dataUrl = exportPng(stage, doc.room);
+    downloadUrl(dataUrl, planFilename(doc.title, 'png'));
+    // "Show file" needs a real Blob URL, not the `data:` URL `toDataURL`
+    // returns directly — see `dataUrlToBlobUrl`'s own header comment for why.
+    const blobUrl = dataUrlToBlobUrl(dataUrl);
+    showToast(t('planExported'), null, { label: t('showFile'), onClick: () => window.open(blobUrl, '_blank') });
+    setTimeout(() => URL.revokeObjectURL(blobUrl), OBJECT_URL_LIFETIME_MS);
     close();
   }
 
@@ -134,6 +156,7 @@ export function ExportMenu() {
           role="menu"
           className="absolute right-0 top-[calc(100%+6px)] z-50 w-48 border border-panel-border bg-paper py-1 shadow-screen"
         >
+          <MenuItem label={t('exportPng')} onSelect={handleExportPng} />
           <MenuItem label={t('exportJson')} onSelect={handleExportJson} />
           <div className="my-1 border-t border-hairline" />
           <MenuItem label={t('importJson')} onSelect={handleImportClick} />
