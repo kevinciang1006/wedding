@@ -1,0 +1,156 @@
+'use client';
+
+import { memo, useEffect, useRef } from 'react';
+import type Konva from 'konva';
+import { Group, Rect, Shape, Text } from 'react-konva';
+import { useDocStore } from '@/stores/docStore';
+import { useViewStore } from '@/stores/viewStore';
+import { useObjectDrag } from '@/components/canvas/useObjectDrag';
+import { getBounds, isOutsideRoom } from '@/lib/geometry/bounds';
+import { isProp } from '@/lib/types/doc';
+import { COOL, HATCH_BAND, OBJECT_STROKE, PROP_FILL, ROOM_FILL, TEXT_SECONDARY, canvasDataFont } from '@/lib/canvasTokens';
+import { OUTSIDE_ROOM_OPACITY, PROP_LABEL_FONT_SIZE } from '@/lib/constants';
+
+interface PropNodeProps { id: string }
+
+const HATCH_BAND_WIDTH = 6; // cm, matches the design spec's 6px repeating-linear-gradient band
+
+/**
+ * Hand-drawn 45° two-tone hatch — Konva has no CSS repeating-gradient
+ * equivalent, so this fills the clipped rect with the light band, then
+ * strokes a series of parallel 45° lines in the dark band across it, wide
+ * enough (`span`) that they cover the rect however it's sized.
+ */
+function drawHatch(ctx: Konva.Context, width: number, height: number): void {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, width, height);
+  ctx.clip();
+  ctx.fillStyle = ROOM_FILL;
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = HATCH_BAND;
+  ctx.lineWidth = HATCH_BAND_WIDTH;
+  const period = HATCH_BAND_WIDTH * 2;
+  const span = width + height;
+  for (let offset = -span; offset < span; offset += period) {
+    ctx.beginPath();
+    ctx.moveTo(offset, 0);
+    ctx.lineTo(offset + height, height);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/**
+ * Bar/stage/buffet/rect share one plain-rect plate; dance floor swaps in
+ * the hatch above and skips the shared fill. The hatch is cached (like the
+ * room grid in StaticLayer) — it's the one shape here actually expensive
+ * enough to redraw every frame — and re-cached whenever this object's own
+ * data changes. That's broader than strictly necessary (a resize needs a
+ * fresh cache, a plain move doesn't), but it only touches this one dance
+ * floor's own effect, not the cross-object re-render this task's isolation
+ * rule is actually about.
+ *
+ * The Group is this object's one interactive Konva node — `id={obj.id}`,
+ * `draggable`, and `useObjectDrag(id)`'s handlers, same wiring `TableNode`
+ * uses, so `SelectionTransformer` and a multi-select drag can find this
+ * node by id regardless of object kind. Plate stroke turns `COOL` when
+ * selected, matching `TableNode`'s own plate treatment. `scaleX`/`scaleY`
+ * pinned at 1: props get real resize via the Transformer, which converts
+ * its scale into new width/height and resets the node's scale back to 1 on
+ * `transformEnd` — these props exist so that reset is never fighting a
+ * leftover non-1 value passed down from here on the next render.
+ */
+export const PropNode = memo(function PropNode({ id }: PropNodeProps) {
+  const obj = useDocStore((s) => s.objects[id]);
+  const room = useDocStore((s) => s.room);
+  const selected = useViewStore((s) => s.selectedIds.includes(id));
+  const drag = useObjectDrag(id);
+  const hatchRef = useRef<Konva.Shape | null>(null);
+  // Narrowing on `obj.type === 'danceFloor'` here (rather than inside the
+  // effect) pulls plain-number width/height out of the SceneObject union
+  // eagerly, so the effect's own deps are those two numbers, not the whole
+  // `obj`. Task 10 adds dragging, which commits `obj` on every pointer-move;
+  // depending on the whole object would re-rasterise this cached hatch on
+  // every drag frame instead of only on an actual resize.
+  const danceFloorWidth = obj && obj.type === 'danceFloor' ? obj.width : undefined;
+  const danceFloorHeight = obj && obj.type === 'danceFloor' ? obj.height : undefined;
+
+  useEffect(() => {
+    if (danceFloorWidth === undefined || danceFloorHeight === undefined) return;
+    hatchRef.current?.cache({ x: 0, y: 0, width: danceFloorWidth, height: danceFloorHeight });
+  }, [danceFloorWidth, danceFloorHeight]);
+
+  if (!obj || !isProp(obj)) return null;
+
+  const opacity = isOutsideRoom(getBounds(obj), room) ? OUTSIDE_ROOM_OPACITY : 1;
+  const labelH = PROP_LABEL_FONT_SIZE * 1.3;
+  const stroke = selected ? COOL : OBJECT_STROKE;
+
+  return (
+    <Group
+      id={obj.id}
+      x={obj.x}
+      y={obj.y}
+      rotation={obj.rotation}
+      scaleX={1}
+      scaleY={1}
+      opacity={opacity}
+      draggable={drag.draggable}
+      onMouseDown={drag.onMouseDown}
+      onClick={drag.onClick}
+      onContextMenu={drag.onContextMenu}
+      onDragStart={drag.onDragStart}
+      onDragMove={drag.onDragMove}
+      onDragEnd={drag.onDragEnd}
+    >
+      {obj.type === 'danceFloor' ? (
+        <>
+          <Shape
+            ref={hatchRef}
+            x={-obj.width / 2}
+            y={-obj.height / 2}
+            width={obj.width}
+            height={obj.height}
+            sceneFunc={(ctx) => drawHatch(ctx, obj.width, obj.height)}
+          />
+          <Rect
+            x={-obj.width / 2}
+            y={-obj.height / 2}
+            width={obj.width}
+            height={obj.height}
+            stroke={stroke}
+            strokeWidth={1.5}
+            dash={[4, 4]}
+            strokeScaleEnabled={false}
+          />
+        </>
+      ) : (
+        <Rect
+          x={-obj.width / 2}
+          y={-obj.height / 2}
+          width={obj.width}
+          height={obj.height}
+          fill={obj.type === 'rect' ? undefined : PROP_FILL}
+          stroke={stroke}
+          strokeWidth={1.5}
+          strokeScaleEnabled={false}
+        />
+      )}
+      <Text
+        text={obj.label.toUpperCase()}
+        fontFamily={canvasDataFont()}
+        fontSize={PROP_LABEL_FONT_SIZE}
+        letterSpacing={PROP_LABEL_FONT_SIZE * 0.1}
+        fill={TEXT_SECONDARY}
+        width={obj.width}
+        height={labelH}
+        offsetX={obj.width / 2}
+        offsetY={labelH / 2}
+        align="center"
+        verticalAlign="middle"
+        wrap="none"
+      />
+    </Group>
+  );
+});

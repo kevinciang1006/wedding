@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #171b1f;
+  --color-canvas: #e8edef;
+  --color-rule: #cbd4d9;
+  --color-cool: #1e62a8;
+  --color-warm: #b8762a;
+  --color-flag: #8e3b2f;
+
+  --color-paper: #ffffff;
+  --color-subtle: #f7f9fa;
+  --color-toolbar: #f2f5f7;
+  --color-hairline: #edf1f3;
+  --color-divider: #e2e8eb;
+  --color-divider-light: #dfe6e9;
+  --color-panel-border: #d5dee2;
+  --color-ruler-border: #c6d0d6;
+  --color-readout-border: #9eaeb8;
+  --color-seat-stroke: #c3cdd3;
+  --color-object-stroke: #b7c3ca;
+  --color-text-disabled: #b3bdc3;
+  --color-text-muted: #8a959c;
+  --color-text-secondary: #5b676f;
+  --color-text-body: #3d4950;
+  --color-wall: #2b343a;
+
+  --color-cool-deep: #17497c;
+  --color-cool-light: #9cc4e8;
+  --color-cool-tint: #e4eff9;
+  --color-cool-ruler: #dce9f5;
+  --color-cool-wash: #f2f7fc;
+
+  --color-warm-seat: #ebd7b4;
+  --color-warm-card: #f9f2e7;
+  --color-warm-text: #8a6120;
+  --color-warm-deep: #5c3d10;
+
+  --color-flag-border: #e0c4be;
+
+  --font-ui: var(--font-archivo), 'Helvetica Neue', Helvetica, sans-serif;
+  --font-name: var(--font-newsreader), Georgia, serif;
+  --font-data: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-none: 0;
+
+  /* Floating-panel shadow (design source: "screen" — context menu, and any
+     later dropdown/toast that isn't the bottom-left readout HUD, which gets
+     its own, tighter "readout" shadow instead). */
+  --shadow-screen: 0 4px 28px rgba(20, 32, 40, 0.12);
+  --shadow-readout: 0 2px 10px rgba(20, 32, 40, 0.10);
+  /* The dragged guest chip ghost (Task 14) — heavier than `shadow-screen`,
+     since this floats directly over both the panel and the canvas mid-drag
+     rather than sitting flush against either. */
+  --shadow-drag-lg: 0 10px 22px rgba(20, 32, 40, 0.24);
+}
+
+/* Drafting chrome: square corners everywhere except circles. */
+:where(button, input, select, textarea, [role='button']) {
+  border-radius: 0;
+}
+
+/* Reserve the focus ring's border space at rest so gaining it on focus never
+   reflows the element. Buttons and form controls only, not `a`: those are
+   boxes with their own padding, so a transparent border is invisible until
+   focus. A bare inline text link has no padding to absorb it — the same
+   1.5px on all four sides reads as the link sitting loose from the words
+   around it. Links get the box-shadow halo alone below, which never affects
+   layout at rest or on focus, so there is nothing for them to reserve. */
+:where(button, input, select, textarea, [tabindex]) {
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: transparent;
+}
+
+/* A field that draws its own box instead of sitting inside a bordered
+   wrapper — the mobile viewer's search field, which the design gives a
+   visible 48px box and a focus ring around that whole box, not around the
+   text node inside it.
+
+   It has to live here rather than as a `border-rule` utility on the element:
+   the rules in this file are unlayered and Tailwind's utilities are not, so
+   an unlayered `border-color: transparent` above always wins over any
+   utility regardless of specificity. Sits BEFORE the focus rule and at the
+   same specificity (one class), so focus still recolours it. */
+.field-boxed {
+  border-color: var(--color-rule);
+}
+
+:where(button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: var(--color-cool);
+  box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
+}
+
+:where(a):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(30 98 168 / 0.18);
+}
+
+/* Touch layouts (the 768–1023px editor and the phone viewer, both marked by
+   `data-touch` on their root): every control reaches at least 44px in both
+   axes.
+
+   The target grows as a centred pseudo-element rather than as padding or a
+   min-height, so a control's drawn size — and with it the whole drafting
+   chrome's density, which is the point of this interface — is unchanged;
+   only the area that answers a finger grows. `max(100%, 44px)` leaves
+   anything already larger alone. Controls this dense inevitably end up with
+   targets that overlap their neighbours' by a few px; every control's own
+   centre is still unambiguously its own.
+
+   Inputs take a min-height instead: `::before`/`::after` do not render on
+   replaced elements, so there is no pseudo-element to grow.
+
+   These three sit in `@layer base` — unlike everything else in this file,
+   which is deliberately unlayered so it beats Tailwind's utilities. Here the
+   opposite is wanted: `position: relative` is only a default for buttons
+   that have no position of their own, and a button a component explicitly
+   places (`absolute`, for a field's inline "clear") must keep that. Being in
+   an earlier layer than `utilities` is what lets any such utility win. */
+@layer base {
+  [data-touch='true'] :where(button, [role='button']) {
+    position: relative;
+  }
+
+  [data-touch='true'] :where(button, [role='button'])::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+
+  [data-touch='true'] :where(input, select, textarea) {
+    min-height: 44px;
+  }
+}
+
+/* The only animation in the product: a guest settling into a seat. */
+@keyframes settle {
+  0%   { transform: scale(1.18); }
+  60%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
