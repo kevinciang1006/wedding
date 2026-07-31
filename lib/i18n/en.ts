@@ -125,6 +125,9 @@ export const en = {
   dropTarget: 'drop target',
   occupied: 'occupied',
   seatNumber: 'seat {n}',
+  seatedHere: 'Seated here',
+  unseat: 'Unseat',
+  noMatchingGuests: 'No matching guests',
   atYourTable: 'At your table',
   andMore: '+ {count} more',
 

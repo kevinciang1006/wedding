@@ -5,6 +5,7 @@ import Konva from 'konva';
 import { Circle, Group, Text } from 'react-konva';
 import { useDocStore } from '@/stores/docStore';
 import { useViewStore } from '@/stores/viewStore';
+import { startGuestDrag } from '@/components/dnd/useGuestDrag';
 import type { Seat } from '@/lib/geometry/seats';
 import {
   COOL, FLAG, ROOM_FILL, SEAT_DROP_FILL, SEAT_DROP_RING, SEAT_EMPTY_STROKE,
@@ -55,6 +56,14 @@ function initialsOf(name: string): string {
  * deliberately broad subscription: every seat has to react to the D6 zoom
  * ladder, and that isolation guarantee is about "moving one table" (or
  * "seating one guest"), not about zooming the whole canvas.
+ *
+ * `handlePointerDown`/`handleClick` below (Task 14) add no subscriptions of
+ * their own — both call `startGuestDrag`/`viewStore.getState().openSeatMenu`
+ * imperatively, the same `getState()`-not-`useStore()` rule `useObjectDrag.ts`
+ * follows for the identical reason: a real subscription to, say,
+ * `viewStore.guestDrag` here would re-render every mounted seat on every
+ * pointermove of any guest drag, not just the one seat a gesture actually
+ * touches.
  */
 export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
   const guestId = useDocStore((s) => s.seatAssignments[seat.id] ?? null);
@@ -114,8 +123,31 @@ export const SeatNode = memo(function SeatNode({ seat }: SeatNodeProps) {
   // Cap at a quarter of the seat so it cannot swamp the seat when zoomed far out.
   const dotRadius = Math.min(SEAT_RADIUS * 0.25, DIETARY_DOT_SCREEN_PX / scale);
 
+  // An occupied seat can be picked straight up and dragged (moved, swapped,
+  // or unseated by dragging it off every table) — `startGuestDrag` itself
+  // withholds any effect until its own arm threshold, and its `onTap`
+  // fires here only if the gesture never crossed it, opening `SeatMenu`
+  // exactly as a plain click would. An empty seat has no guest to drag, so
+  // it only ever needs the plain-click path below.
+  function handlePointerDown(e: Konva.KonvaEventObject<PointerEvent>): void {
+    if (guest === null) return;
+    e.cancelBubble = true;
+    startGuestDrag(guest.id, e.evt, (clientX, clientY) => {
+      useViewStore.getState().openSeatMenu({ seatId: seat.id, x: clientX, y: clientY });
+    });
+  }
+
+  // Occupied seats are handled entirely by the pointerdown/onTap path above
+  // (both a plain click and a drag start there); this only ever fires for
+  // an empty seat, where there is nothing to arm a drag over.
+  function handleClick(e: Konva.KonvaEventObject<MouseEvent>): void {
+    if (guest !== null) return;
+    e.cancelBubble = true;
+    useViewStore.getState().openSeatMenu({ seatId: seat.id, x: e.evt.clientX, y: e.evt.clientY });
+  }
+
   return (
-    <Group ref={groupRef} x={seat.x} y={seat.y}>
+    <Group ref={groupRef} x={seat.x} y={seat.y} onPointerDown={handlePointerDown} onClick={handleClick}>
       {isHovered && (
         <Circle radius={SEAT_RADIUS + 3} stroke={SEAT_DROP_RING} strokeWidth={4} strokeScaleEnabled={false} />
       )}

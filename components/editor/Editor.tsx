@@ -3,6 +3,7 @@
 import type { DragEvent } from 'react';
 import { CanvasStage } from '@/components/canvas/CanvasStage';
 import { ContextMenu } from '@/components/canvas/ContextMenu';
+import { SeatMenu } from '@/components/canvas/SeatMenu';
 import { Ruler, RulerCorner } from '@/components/canvas/Ruler';
 import { Readout } from '@/components/chrome/Readout';
 import { ScaleBadge } from '@/components/chrome/ScaleBadge';
@@ -11,6 +12,7 @@ import { ObjectPalette } from '@/components/chrome/ObjectPalette';
 import { Toast } from '@/components/chrome/Toast';
 import { Inspector } from '@/components/inspector/Inspector';
 import { GuestPanel } from '@/components/guests/GuestPanel';
+import { GuestDragGhost } from '@/components/dnd/GuestDragGhost';
 import { useUiStore } from '@/stores/uiStore';
 import { useViewport } from '@/components/canvas/useViewport';
 import { useKeyboard, placeObject } from '@/components/canvas/useKeyboard';
@@ -115,6 +117,8 @@ export function Editor() {
         {guestPanelOpen && <GuestPanel />}
       </div>
       <ContextMenu />
+      <SeatMenu />
+      <GuestDragGhost />
       <Toast />
     </div>
   );

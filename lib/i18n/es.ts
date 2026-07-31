@@ -120,6 +120,9 @@ export const es: Record<keyof typeof en, string> = {
   dropTarget: 'destino',
   occupied: 'ocupado',
   seatNumber: 'asiento {n}',
+  seatedHere: 'Sentado aquí',
+  unseat: 'Quitar del asiento',
+  noMatchingGuests: 'Sin invitados coincidentes',
   atYourTable: 'En tu mesa',
   andMore: '+ {count} más',
 

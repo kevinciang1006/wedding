@@ -49,6 +49,10 @@
      its own, tighter "readout" shadow instead). */
   --shadow-screen: 0 4px 28px rgba(20, 32, 40, 0.12);
   --shadow-readout: 0 2px 10px rgba(20, 32, 40, 0.10);
+  /* The dragged guest chip ghost (Task 14) — heavier than `shadow-screen`,
+     since this floats directly over both the panel and the canvas mid-drag
+     rather than sitting flush against either. */
+  --shadow-drag-lg: 0 10px 22px rgba(20, 32, 40, 0.24);
 }
 
 /* Drafting chrome: square corners everywhere except circles. */

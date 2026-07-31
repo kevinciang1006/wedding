@@ -92,7 +92,8 @@ export function deleteSelection(): void {
  * Window-level shortcuts for selection and object manipulation: arrow nudge
  * (`Shift` for the large step), `Cmd/Ctrl+D` duplicate, `Delete`/
  * `Backspace` remove, `Cmd/Ctrl+A` select all, `Escape` clear selection
- * (and close the context menu, if open), `G` toggle grid snap, `T` place a
+ * (and close the context menu and Task 14's seat menu, if either is open),
+ * `G` toggle grid snap, `T` place a
  * new round table at the viewport centre, `Cmd/Ctrl+E` the export toast
  * (Task 15 owns the real feature; this just backs the top bar's visible
  * `⌘E` hint so it isn't a lie), and `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z`
@@ -123,6 +124,7 @@ export function useKeyboard(viewport: Viewport): void {
       if (e.key === 'Escape') {
         useViewStore.getState().clearSelection();
         useViewStore.getState().closeContextMenu();
+        useViewStore.getState().closeSeatMenu();
         return;
       }
 

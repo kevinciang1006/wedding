@@ -34,6 +34,16 @@ interface ViewState {
   // the menu itself is plain HTML rendered as a sibling of the Konva
   // Stage, not a Konva node.
   contextMenu: { x: number; y: number; targetId: string } | null;
+  // A guest pointer-drag in progress (Task 14) — `null` until the gesture
+  // crosses the arm threshold in `components/dnd/useGuestDrag.ts`, so a
+  // plain click never flashes a ghost or a list placeholder. `x`/`y` are
+  // client (screen) px, the same convention `contextMenu` above uses,
+  // since `GuestDragGhost` is a `position: fixed` HTML element, not a
+  // Konva node — it never touches room cm.
+  guestDrag: { guestId: string; x: number; y: number } | null;
+  // The click-to-assign popup a plain (non-drag) click on a seat opens —
+  // screen coordinates again, same reasoning as `contextMenu`.
+  seatMenu: { seatId: string; x: number; y: number } | null;
 }
 
 interface ViewActions {
@@ -53,6 +63,9 @@ interface ViewActions {
   setJustSeated: (id: string | null) => void;
   openContextMenu: (menu: NonNullable<ViewState['contextMenu']>) => void;
   closeContextMenu: () => void;
+  setGuestDrag: (drag: ViewState['guestDrag']) => void;
+  openSeatMenu: (menu: NonNullable<ViewState['seatMenu']>) => void;
+  closeSeatMenu: () => void;
 }
 
 export type ViewStoreState = ViewState & ViewActions;
@@ -83,6 +96,8 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   hoveredSeatId: null,
   justSeatedSeatId: null,
   contextMenu: null,
+  guestDrag: null,
+  seatMenu: null,
 
   setView: (view) => set(view),
   select: (ids) => set({ selectedIds: ids }),
@@ -102,4 +117,7 @@ export const useViewStore = create<ViewStoreState>((set) => ({
   setJustSeated: (id) => set({ justSeatedSeatId: id }),
   openContextMenu: (menu) => set({ contextMenu: menu }),
   closeContextMenu: () => set({ contextMenu: null }),
+  setGuestDrag: (drag) => set({ guestDrag: drag }),
+  openSeatMenu: (menu) => set({ seatMenu: menu }),
+  closeSeatMenu: () => set({ seatMenu: null }),
 }));

@@ -61,3 +61,6 @@ export const MEASURE_BADGE_FONT_PX = 9.5; // live-drag badge + snap label text
 export const MEASURE_BADGE_PAD_X_PX = 5;
 export const MEASURE_BADGE_PAD_Y_PX = 1;
 export const SNAP_LABEL_OFFSET_PX = 10;  // snap label's clearance from its guide's marker
+
+// Guest-to-seat pointer drag (Task 14).
+export const GUEST_DRAG_ARM_PX = 4; // screen px of movement before pointerdown becomes a drag, not a click

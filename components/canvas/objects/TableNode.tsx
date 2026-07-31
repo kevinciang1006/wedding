@@ -147,10 +147,12 @@ export const TableNode = memo(function TableNode({ id }: TableNodeProps) {
           wrap="none"
         />
       </Group>
-      {/* listening={false}: seats are purely visual until Task 14 makes them
-          real drop targets — without this they'd otherwise swallow clicks
-          that should reach the Stage's empty-canvas marquee check instead. */}
-      <Group opacity={opacity} listening={false}>
+      {/* listening (the Konva default, true) since Task 14: seats are real
+          click/drag targets now — SeatNode's own pointerdown/click handlers
+          own the seat-vs-empty-canvas distinction (`useMarquee`'s
+          `startMarquee` already no-ops for anything but a direct Stage hit,
+          so enabling this never risks the empty-canvas marquee gesture). */}
+      <Group opacity={opacity}>
         {seats.map((seat) => <SeatNode key={seat.id} seat={seat} />)}
       </Group>
     </>
