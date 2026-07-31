@@ -64,3 +64,10 @@ export const SNAP_LABEL_OFFSET_PX = 10;  // snap label's clearance from its guid
 
 // Guest-to-seat pointer drag (Task 14).
 export const GUEST_DRAG_ARM_PX = 4; // screen px of movement before pointerdown becomes a drag, not a click
+
+// Empty state and first-load restore (Task 16). The top bar's room-width
+// input needs a stable DOM id so the "Start empty" card can hand it focus
+// after creating a blank doc — "sets the room size" means literally landing
+// the user's cursor in that field, ready to type the venue's real
+// dimensions, not just picking defaults silently.
+export const ROOM_WIDTH_INPUT_ID = 'room-width-input';

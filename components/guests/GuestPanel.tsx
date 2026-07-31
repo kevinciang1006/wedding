@@ -105,7 +105,13 @@ export function GuestPanel() {
       <AddGuestForm open={formOpen} onClose={() => setFormOpen(false)} />
 
       <div className="flex-1 overflow-y-auto">
-        {groups.map((groupKey) => <GuestGroup key={groupKey} groupKey={groupKey} filter={filter} />)}
+        {counts.total === 0 ? (
+          <p className="px-3 py-3 font-[family-name:var(--font-ui)] text-[12px] text-text-secondary">
+            {t('guestsLandHere')}
+          </p>
+        ) : (
+          groups.map((groupKey) => <GuestGroup key={groupKey} groupKey={groupKey} filter={filter} />)
+        )}
       </div>
 
       <div className="flex items-center justify-between border-t border-panel-border px-3 py-2.5">

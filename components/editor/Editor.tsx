@@ -13,12 +13,40 @@ import { Toast } from '@/components/chrome/Toast';
 import { Inspector } from '@/components/inspector/Inspector';
 import { GuestPanel } from '@/components/guests/GuestPanel';
 import { GuestDragGhost } from '@/components/dnd/GuestDragGhost';
+import { EmptyState } from '@/components/empty/EmptyState';
 import { useUiStore } from '@/stores/uiStore';
+import { loadSavedDoc, useDocStore } from '@/stores/docStore';
 import { useViewport } from '@/components/canvas/useViewport';
 import { useKeyboard, placeObject } from '@/components/canvas/useKeyboard';
 import { screenPointToRoomCm } from '@/lib/geometry/viewport';
 import { isObjectType, PALETTE_DND_TYPE } from '@/lib/dnd';
 import { RULER_SIZE } from '@/lib/constants';
+
+/**
+ * First-load restore (Task 16), run exactly once as plain module top-level
+ * code rather than inside a React hook. This module is reachable only from
+ * `app/page.tsx`'s `next/dynamic(..., { ssr: false })` import of `Editor` —
+ * the same mechanism the file header below already relies on for Konva
+ * needing `window` — so this line only ever executes in the browser, and it
+ * runs once, synchronously, the moment the chunk is evaluated: before
+ * React calls `Editor()` for the first time, and therefore before
+ * `ObjectPalette`, `GuestPanel` or the `started` read below ever render.
+ * There is no server-rendered HTML for this subtree to hydrate against, so
+ * there is no mismatch to produce, and no flash of `EmptyState` before a
+ * saved document loads — `uiStore.started` is already `true` by the time
+ * anything reads it, if `loadSavedDoc()` found something.
+ *
+ * A React hook's lazy `useState` initializer was the other option, but
+ * Strict Mode's dev-only double-invocation of initializers would run this
+ * (and `replaceDoc`'s `history.clear()`) twice for no benefit — plain
+ * module evaluation happens exactly once regardless of Strict Mode, with no
+ * such risk.
+ */
+const savedDoc = loadSavedDoc();
+if (savedDoc) {
+  useDocStore.getState().replaceDoc(savedDoc);
+  useUiStore.getState().setStarted(true);
+}
 
 /**
  * The client root. The 52px top bar is the first child of the outer column;
@@ -63,11 +91,19 @@ import { RULER_SIZE } from '@/lib/constants';
  * its `dataTransfer` (`ObjectPalette.tsx`'s row `onDragStart`), and the drop
  * point is converted from screen px to room cm via `viewport`'s own
  * scale/pan — the exact inverse of what the Konva `Stage` itself applies.
+ *
+ * `started` (Task 16, set above at module load or by a card in
+ * `EmptyState`) gates two things here: the palette renders dimmed and
+ * inert until it's true (there's nothing useful to place before the user
+ * has picked a room), and `EmptyState` itself overlays the canvas viewport
+ * cell — not the whole page — so the top bar, palette and guest panel stay
+ * visibly present underneath it the whole time.
  */
 export function Editor() {
   const viewport = useViewport();
   useKeyboard(viewport);
   const guestPanelOpen = useUiStore((s) => s.guestPanelOpen);
+  const started = useUiStore((s) => s.started);
 
   function handleDragOver(e: DragEvent<HTMLDivElement>): void {
     if (!e.dataTransfer.types.includes(PALETTE_DND_TYPE)) return;
@@ -90,7 +126,9 @@ export function Editor() {
     <div className="flex h-dvh w-full flex-col overflow-hidden">
       <TopBar viewport={viewport} />
       <div className="flex flex-1 overflow-hidden">
-        <ObjectPalette viewport={viewport} />
+        <div className={`flex shrink-0 ${started ? '' : 'pointer-events-none opacity-45'}`}>
+          <ObjectPalette viewport={viewport} />
+        </div>
         <div
           className="grid flex-1 overflow-hidden"
           // Tailwind's arbitrary-value classes can't interpolate a JS constant,
@@ -112,6 +150,7 @@ export function Editor() {
             <Readout />
             <ScaleBadge />
             <Inspector />
+            {!started && <EmptyState />}
           </div>
         </div>
         {guestPanelOpen && <GuestPanel />}

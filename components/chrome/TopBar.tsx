@@ -8,7 +8,7 @@ import { useT } from '@/lib/i18n/useT';
 import { useCommitField } from '@/components/chrome/useCommitField';
 import { ExportMenu } from '@/components/chrome/ExportMenu';
 import { formatValue, parseLength } from '@/lib/units/format';
-import { ZOOM_KEY_STEP } from '@/lib/constants';
+import { ROOM_WIDTH_INPUT_ID, ZOOM_KEY_STEP } from '@/lib/constants';
 import type { Viewport } from '@/components/canvas/useViewport';
 import type { Units } from '@/lib/types/doc';
 
@@ -83,8 +83,8 @@ function Divider() {
   return <div className="h-[22px] w-px shrink-0 bg-divider-light" />;
 }
 
-function RoomDimInput({ cm, units, ariaLabel, onCommitCm }: {
-  cm: number; units: Units; ariaLabel: string; onCommitCm: (cm: number) => void;
+function RoomDimInput({ id, cm, units, ariaLabel, onCommitCm }: {
+  id?: string; cm: number; units: Units; ariaLabel: string; onCommitCm: (cm: number) => void;
 }) {
   const canonical = formatValue(cm, units);
   const field = useCommitField(canonical, (text) => {
@@ -95,6 +95,7 @@ function RoomDimInput({ cm, units, ariaLabel, onCommitCm }: {
   });
   return (
     <input
+      id={id}
       type="text"
       inputMode="decimal"
       aria-label={ariaLabel}
@@ -184,6 +185,7 @@ export function TopBar({ viewport }: TopBarProps) {
       <div className="flex items-center gap-2">
         <span className="font-[family-name:var(--font-data)] text-[11px] text-text-secondary">{t('room')}</span>
         <RoomDimInput
+          id={ROOM_WIDTH_INPUT_ID}
           cm={room.width}
           units={units}
           ariaLabel={t('roomWidth')}

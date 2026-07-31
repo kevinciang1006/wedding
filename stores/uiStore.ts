@@ -40,6 +40,14 @@ interface UiState {
   // Chrome state, not `viewStore.contextMenu`'s x/y-positioned kind — this
   // one is always anchored under the same button, so a boolean is enough.
   exportMenuOpen: boolean;
+  // Task 16's first-load gate: false until either a saved document is
+  // restored on mount or the user picks a card in `EmptyState` (sample or
+  // blank). Drives `EmptyState`'s own visibility and the object palette's
+  // dimmed/inert look — never persisted (a fresh reload always re-derives
+  // it from whether `loadSavedDoc()` finds something), and never itself a
+  // property of the `Doc` — a user who deletes every object from a
+  // genuinely started plan must never see this screen reappear.
+  started: boolean;
 }
 
 interface UiActions {
@@ -52,6 +60,7 @@ interface UiActions {
   dismissToast: () => void;
   toggleExportMenu: () => void;
   closeExportMenu: () => void;
+  setStarted: (started: boolean) => void;
 }
 
 export type UiStoreState = UiState & UiActions;
@@ -70,6 +79,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   dialog: null,
   toast: null,
   exportMenuOpen: false,
+  started: false,
 
   setLanguage: (language) => set({ language }),
   setFilter: (filter) => set((s) => ({ filter: { ...s.filter, ...filter } })),
@@ -84,4 +94,5 @@ export const useUiStore = create<UiStoreState>((set) => ({
   dismissToast: () => set({ toast: null }),
   toggleExportMenu: () => set((s) => ({ exportMenuOpen: !s.exportMenuOpen })),
   closeExportMenu: () => set({ exportMenuOpen: false }),
+  setStarted: (started) => set({ started }),
 }));
