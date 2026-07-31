@@ -9,12 +9,8 @@ import type { Viewport } from '@/components/canvas/useViewport';
 import { createObject, duplicateObject } from '@/lib/doc/factory';
 import { tableIdOfSeat } from '@/lib/doc/assignments';
 import { viewportCentreCm } from '@/lib/geometry/viewport';
-import { en } from '@/lib/i18n/en';
-import { es } from '@/lib/i18n/es';
 import { DUPLICATE_OFFSET, NUDGE, NUDGE_LARGE } from '@/lib/constants';
 import type { Cm, ObjectType } from '@/lib/types/doc';
-
-const DICTIONARIES = { en, es };
 
 /** Moves every selected object by the same delta in one history entry. */
 function nudgeSelection(dx: Cm, dy: Cm): void {
@@ -152,14 +148,12 @@ export function useKeyboard(viewport: Viewport): void {
       }
       if (mod && e.key.toLowerCase() === 'e') {
         e.preventDefault();
-        // Real export is Task 15. This backs the top bar's visible `⌘E`
-        // hint with a real (if minimal) response rather than leaving a
-        // documented shortcut silently do nothing. Reads the dictionary
-        // directly, not `useT()` — this handler is imperative code outside
-        // a render, the same reason `duplicateSelection`/`deleteSelection`
-        // below read stores via `getState()` rather than a subscription.
-        const { language, showToast } = useUiStore.getState();
-        showToast(DICTIONARIES[language].exportComingSoon);
+        // Opens the same dropdown the top bar's export button does, rather
+        // than exporting one guessed format outright — there are four
+        // destinations (PNG/PDF/JSON/import) behind that button now, and
+        // `⌘E` picking one for the user would be a guess `ExportMenu.tsx`'s
+        // own click handler doesn't have to make.
+        useUiStore.getState().toggleExportMenu();
         return;
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {

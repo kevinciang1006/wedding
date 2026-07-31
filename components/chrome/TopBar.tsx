@@ -6,6 +6,7 @@ import { useDocStore } from '@/stores/docStore';
 import { useUiStore } from '@/stores/uiStore';
 import { useT } from '@/lib/i18n/useT';
 import { useCommitField } from '@/components/chrome/useCommitField';
+import { ExportMenu } from '@/components/chrome/ExportMenu';
 import { formatValue, parseLength } from '@/lib/units/format';
 import { ZOOM_KEY_STEP } from '@/lib/constants';
 import type { Viewport } from '@/components/canvas/useViewport';
@@ -136,7 +137,6 @@ export function TopBar({ viewport }: TopBarProps) {
   const t = useT();
   const language = useUiStore((s) => s.language);
   const setLanguage = useUiStore((s) => s.setLanguage);
-  const showToast = useUiStore((s) => s.showToast);
   const title = useDocStore((s) => s.title);
   const eventDate = useDocStore((s) => s.eventDate);
   const units = useDocStore((s) => s.units);
@@ -233,14 +233,7 @@ export function TopBar({ viewport }: TopBarProps) {
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={() => showToast(t('exportComingSoon'))}
-        className="flex h-7 items-center gap-2 bg-ink px-3.5 font-[family-name:var(--font-ui)] text-[12.5px] font-medium text-paper"
-      >
-        {t('exportPlan')}
-        <span className="font-[family-name:var(--font-data)] text-[10px] text-[#93A0A7]">⌘E</span>
-      </button>
+      <ExportMenu />
 
       <Segmented
         ariaLabel={t('language')}

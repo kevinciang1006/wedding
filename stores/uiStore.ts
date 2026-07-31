@@ -14,9 +14,18 @@ interface Filter {
   query: string;
 }
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface Toast {
   message: string;
   detail: string | null;
+  // The top bar's post-export "Show file" link — optional, so every other
+  // toast (CSV import counts, the old keyboard-shortcut placeholder) can go
+  // on calling `showToast` with just a message and stay unaffected.
+  action: ToastAction | null;
 }
 
 interface UiState {
@@ -27,6 +36,10 @@ interface UiState {
   collapsedGroups: string[];
   dialog: 'csv' | 'room' | null;
   toast: Toast | null;
+  // The top bar's export dropdown (Export image/PDF/data, Import plan).
+  // Chrome state, not `viewStore.contextMenu`'s x/y-positioned kind — this
+  // one is always anchored under the same button, so a boolean is enough.
+  exportMenuOpen: boolean;
 }
 
 interface UiActions {
@@ -35,8 +48,10 @@ interface UiActions {
   toggleGroup: (group: string) => void;
   openDialog: (dialog: 'csv' | 'room') => void;
   closeDialog: () => void;
-  showToast: (message: string, detail?: string | null) => void;
+  showToast: (message: string, detail?: string | null, action?: ToastAction | null) => void;
   dismissToast: () => void;
+  toggleExportMenu: () => void;
+  closeExportMenu: () => void;
 }
 
 export type UiStoreState = UiState & UiActions;
@@ -54,6 +69,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   collapsedGroups: [],
   dialog: null,
   toast: null,
+  exportMenuOpen: false,
 
   setLanguage: (language) => set({ language }),
   setFilter: (filter) => set((s) => ({ filter: { ...s.filter, ...filter } })),
@@ -64,6 +80,8 @@ export const useUiStore = create<UiStoreState>((set) => ({
   })),
   openDialog: (dialog) => set({ dialog }),
   closeDialog: () => set({ dialog: null }),
-  showToast: (message, detail = null) => set({ toast: { message, detail } }),
+  showToast: (message, detail = null, action = null) => set({ toast: { message, detail, action } }),
   dismissToast: () => set({ toast: null }),
+  toggleExportMenu: () => set((s) => ({ exportMenuOpen: !s.exportMenuOpen })),
+  closeExportMenu: () => set({ exportMenuOpen: false }),
 }));

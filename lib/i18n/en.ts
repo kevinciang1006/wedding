@@ -11,7 +11,6 @@ export const en = {
   zoomOut: 'Zoom out',
   roomWidth: 'Room width',
   roomHeight: 'Room height',
-  exportComingSoon: 'Export lands in a later step',
   language: 'Language',
   units: 'Units',
 
@@ -62,6 +61,12 @@ export const en = {
   exportPng: 'Export image',
   exportPdf: 'Export PDF',
   exportJson: 'Export data',
+  planImported: 'Plan imported',
+  importInvalidFile: "That file isn't a Setting plan.",
+  importVersionMismatch: "That file is from a version of Setting this build doesn't read (v{version}).",
+  pdfColumnSeat: 'Seat',
+  pdfColumnGuest: 'Guest',
+  pdfColumnDietary: 'Dietary',
 
   guests: 'Guests',
   addGuest: 'Add guest',

@@ -16,7 +16,6 @@ export const es: Record<keyof typeof en, string> = {
   zoomOut: 'Alejar',
   roomWidth: 'Ancho de la sala',
   roomHeight: 'Alto de la sala',
-  exportComingSoon: 'La exportación llega más adelante',
   language: 'Idioma',
   units: 'Unidades',
 
@@ -57,6 +56,12 @@ export const es: Record<keyof typeof en, string> = {
   exportPng: 'Exportar imagen',
   exportPdf: 'Exportar PDF',
   exportJson: 'Exportar datos',
+  planImported: 'Plano importado',
+  importInvalidFile: 'Ese archivo no es un plano de Setting.',
+  importVersionMismatch: 'Ese archivo es de una versión de Setting que esta versión no puede leer (v{version}).',
+  pdfColumnSeat: 'Asiento',
+  pdfColumnGuest: 'Invitado',
+  pdfColumnDietary: 'Dieta',
 
   guests: 'Invitados',
   addGuest: 'Añadir invitado',
