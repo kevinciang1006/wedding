@@ -67,6 +67,7 @@ export const en = {
   pdfColumnSeat: 'Seat',
   pdfColumnGuest: 'Guest',
   pdfColumnDietary: 'Dietary',
+  pdfTableEmpty: 'No guests seated',
 
   guests: 'Guests',
   addGuest: 'Add guest',

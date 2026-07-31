@@ -8,6 +8,7 @@ import { useT } from '@/lib/i18n/useT';
 import { docToJson, parseDocJson, DocVersionError } from '@/lib/io/json';
 import { downloadUrl, dataUrlToBlobUrl, planFilename } from '@/lib/io/download';
 import { exportPng } from '@/lib/io/png';
+import { exportPdf } from '@/lib/io/pdf';
 import type { Viewport } from '@/components/canvas/useViewport';
 
 // How long a JSON export's object URL is kept alive: long enough that the
@@ -107,6 +108,21 @@ export function ExportMenu({ viewport }: ExportMenuProps) {
     close();
   }
 
+  function handleExportPdf(): void {
+    // Same guard as PNG export above — nothing to render the room page
+    // from without a mounted stage.
+    const stage = viewport.stageRef.current;
+    if (!stage) return;
+    const doc = getDoc();
+    const pdf = exportPdf(stage, doc, t);
+    const blob = pdf.output('blob');
+    const url = URL.createObjectURL(blob);
+    downloadUrl(url, planFilename(doc.title, 'pdf'));
+    showToast(t('planExported'), null, { label: t('showFile'), onClick: () => window.open(url, '_blank') });
+    setTimeout(() => URL.revokeObjectURL(url), OBJECT_URL_LIFETIME_MS);
+    close();
+  }
+
   function handleImportClick(): void {
     close();
     fileInputRef.current?.click();
@@ -157,6 +173,7 @@ export function ExportMenu({ viewport }: ExportMenuProps) {
           className="absolute right-0 top-[calc(100%+6px)] z-50 w-48 border border-panel-border bg-paper py-1 shadow-screen"
         >
           <MenuItem label={t('exportPng')} onSelect={handleExportPng} />
+          <MenuItem label={t('exportPdf')} onSelect={handleExportPdf} />
           <MenuItem label={t('exportJson')} onSelect={handleExportJson} />
           <div className="my-1 border-t border-hairline" />
           <MenuItem label={t('importJson')} onSelect={handleImportClick} />

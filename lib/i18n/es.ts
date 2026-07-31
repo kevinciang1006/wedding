@@ -62,6 +62,7 @@ export const es: Record<keyof typeof en, string> = {
   pdfColumnSeat: 'Asiento',
   pdfColumnGuest: 'Invitado',
   pdfColumnDietary: 'Dieta',
+  pdfTableEmpty: 'Sin invitados sentados',
 
   guests: 'Invitados',
   addGuest: 'Añadir invitado',
